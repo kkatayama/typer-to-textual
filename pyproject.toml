@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "generic-typer"
+version = "0.1.0"
+description = ""
+authors = ["palla98 <pallaria98@gmail.com>"]
+readme = "README.md"
+packages = [{include = "generic_typer"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+textual = "^0.10.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
