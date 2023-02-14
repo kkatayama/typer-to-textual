@@ -109,7 +109,38 @@ Screen {
     background: #2d4156;
 }
 
+/* BOOKLET */
 
+#booklet-vertical {
+    border: red;
+    width: 100%;
+    height: 100%;
+}
 
+.booklet-horizontal {
+    border: #ebccd1;
+    width: 100%;
+    height: auto;
+}
 
+.booklet-horizontal > Checkbox {
+    height: auto;
+    width: auto;
+    margin-right: 3;
+}
+
+.booklet-horizontal > .description {
+    border: blank;
+    width: auto;
+}
+
+.booklet-horizontal > .name {
+    border: blank;
+    width: 15%;
+}
+
+.booklet-horizontal > .input {
+    width: auto;
+    dock: right;
+}
 

@@ -5,6 +5,7 @@ from textual.containers import Container, Vertical, Horizontal
 from textual.screen import Screen
 from textual import events
 from textual.pilot import Pilot
+from rich.text import Text
 
 import typer
 
@@ -50,12 +51,20 @@ class HomePage(Screen):
                 continue
             if start and any(word.isalpha() for word in line.split()):
                 command = line.split(" ")
-                command = list(filter(bool, command))
-                command_name = command[1]
-                command_description = " ".join(command[2:-1])
+                words = []
+                current_word = ""
+                for item in command:
+                    if item and item != '│':
+                        current_word += " " + item
+                    else:
+                        words.append(current_word.strip())
+                        current_word = ""
+
+                words = list(filter(bool, words))
+
                 self.query_one(Vertical).mount(Horizontal(
-                    Button(command_name, id=command_name),
-                    Static(command_description),
+                    Button(words[0], id=words[0]),
+                    Static(words[1]),
                     classes="commands-horizontal"
                     )
                 )
@@ -69,25 +78,47 @@ class Booklet(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header("Homepage", classes="header")
-        yield Vertical()
+        yield Vertical(id="booklet-vertical")
 
-    def on_mount(self) -> None:
+    def process_input(self):
         start = False
+        options = []
         for index, line in enumerate(self.output, start=1):
             if "Options" in line:
                 start = True
                 continue
             if start and any(word.isalpha() for word in line.split()):
                 command = line.split(" ")
-                command = list(filter(bool, command))
-                command_name = command[1]
-                command_description = " ".join(command[2:-1])
-                self.query_one(Vertical).mount(Horizontal(
-                    Button(command_name, id=command_name),
-                    Static(command_description),
-                    classes="commands-horizontal"
-                    )
+                words = []
+                current_word = ""
+                for item in command:
+                    if item and item != '│':
+                        current_word += " " + item
+                    else:
+                        words.append(current_word.strip())
+                        current_word = ""
+
+                words = list(filter(bool, words))
+                if len(words) == 2:
+                    words.insert(1, "BOOLEAN")
+                options.append(words)
+
+        return options
+
+    def on_mount(self) -> None:
+        options = self.process_input()
+        for option in options:
+
+            arg_str = f"[b][red]{option[1]}[/] {' '.join(option[2:])}[/]"
+
+            self.query_one(Vertical).mount(Horizontal(
+                Static(f"[b][cyan]{option[0]}[/][/]", classes="name"),
+                Checkbox(),
+                Static(arg_str, classes="description"),
+                Input(placeholder="prova....", classes="input"),
+                classes="booklet-horizontal"
                 )
+            )
 
 
 class Tui(App):
