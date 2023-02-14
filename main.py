@@ -23,25 +23,48 @@ def output() -> List[str]:
     return risultato.stdout.decode().split('\n')
 
 
-def call_button(command: str) -> List[str]:
+def call_button(command: str, debug: bool) -> List[str]:
     application = "esse3-student"
 
-    if len(sys.argv) != 3:
-        raise Exception("numero di parametri incorretto")
+    """if len(sys.argv) != 3:
+        raise Exception("numero di parametri incorretto")"""
 
-    result = subprocess.run(
-        [application, command, "--help"],
-        capture_output=True,
-    )
+    if debug:
+        result = subprocess.run(
+            [application, "--debug", command, "--help"],
+            capture_output=True,
+        )
+    else:
+        result = subprocess.run(
+            [application, command, "--help"],
+            capture_output=True,
+        )
+
     return result.stdout.decode().split('\n')
 
 
 if __name__ == "__main__":
     result = output()
     Tui(result).run()
-    """for index, line in enumerate(result, start=1):
-        print(line)"""
+    """application = "esse3-student"
 
+    result = subprocess.run(
+        [application, "--help"],
+        capture_output=True,
+    )
+    output = result.stdout.decode().split('\n')
+    start = False
+    for index, line in enumerate(output, start=1):
+        if "Commands" in line:
+            start = True
+            continue
+        if start and any(word.isalpha() for word in line.split()):
+            command = line.split(" ")
+            command = list(filter(bool, command))
+            command_name = command[1]
+            command_description = " ".join(command[2:-1])
+            print(command_name + " " + command_description)
+"""
 
 
     """error = risultato.stderr.decode().split('\n')

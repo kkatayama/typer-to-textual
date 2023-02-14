@@ -6,6 +6,8 @@ from textual.screen import Screen
 from textual import events
 from textual.pilot import Pilot
 
+import typer
+
 import sys
 import subprocess
 from typing import List
@@ -27,21 +29,36 @@ class HomePage(Screen):
             Static(f"Esse3 command line utility", classes="title"),
             Vertical(
                 Static("Option preferences", id="login"),
-                Input(placeholder="username...     [default: None or env var]", classes="credentials"),
-                Input(placeholder="password...     [default: None or env var]", password=True, classes="credentials"),
+                Input(placeholder="username....     [default: None or env var]", classes="credentials"),
+                Input(placeholder="password....     [default: None or env var]", password=True, classes="credentials"),
                 Horizontal(
-                    Static("enable debug mode:"),
+                    Static("enable to show browser backend operations:"),
                     Checkbox(),
                     id="debug"
                 ),
-                Static("commands", id="commands"),
-                Button("Taxes", id="taxes"),
-                Button("Booklet", id="booklet"),
-                #Button("Reservations", id="reservations"),
+                Static("Commands", id="commands"),
             ),
             id="homepage"
         )
         yield Footer()
+
+    def on_mount(self) -> None:
+        start = False
+        for index, line in enumerate(self.output, start=1):
+            if "Commands" in line:
+                start = True
+                continue
+            if start and any(word.isalpha() for word in line.split()):
+                command = line.split(" ")
+                command = list(filter(bool, command))
+                command_name = command[1]
+                command_description = " ".join(command[2:-1])
+                self.query_one(Vertical).mount(Horizontal(
+                    Button(command_name, id=command_name),
+                    Static(command_description),
+                    classes="commands-horizontal"
+                    )
+                )
 
 
 class Booklet(Screen):
@@ -52,7 +69,25 @@ class Booklet(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header("Homepage", classes="header")
-        yield Static(f"{self.output[6]}")
+        yield Vertical()
+
+    def on_mount(self) -> None:
+        start = False
+        for index, line in enumerate(self.output, start=1):
+            if "Options" in line:
+                start = True
+                continue
+            if start and any(word.isalpha() for word in line.split()):
+                command = line.split(" ")
+                command = list(filter(bool, command))
+                command_name = command[1]
+                command_description = " ".join(command[2:-1])
+                self.query_one(Vertical).mount(Horizontal(
+                    Button(command_name, id=command_name),
+                    Static(command_description),
+                    classes="commands-horizontal"
+                    )
+                )
 
 
 class Tui(App):
@@ -82,18 +117,29 @@ class Tui(App):
     def action_key_escape(self) -> None:
         self.exit()
 
-    def call_button(self, command: str) -> List[str]:
+    def call_button(self, command: str, debug: bool) -> List[str]:
         application = "esse3-student"
 
-        result = subprocess.run(
-            [application, command, "--help"],
-            capture_output=True,
-        )
+        """if len(sys.argv) != 3:
+            raise Exception("numero di parametri incorretto")"""
+
+        if debug:
+            result = subprocess.run(
+                [application, "--debug", command, "--help"],
+                capture_output=True,
+            )
+        else:
+            result = subprocess.run(
+                [application, command, "--help"],
+                capture_output=True,
+            )
+
         return result.stdout.decode().split('\n')
 
     def on_button_pressed(self, event: Button.Pressed):
         if event.button.id == "booklet":
-            result = self.call_button("booklet")
+            debug = self.query("Checkbox").first().value
+            result = self.call_button("booklet", debug)
             self.install_screen(Booklet(result), name="booklet")
             self.push_screen("booklet")
 

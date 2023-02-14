@@ -34,6 +34,11 @@ Screen {
     width: 100%;
 }
 
+#options {
+    border: red;
+    width: auto;
+}
+
 #login {
     content-align: center middle;
     min-height: 1;
@@ -79,14 +84,28 @@ Screen {
     margin-bottom: 1;
 }
 
-#homepage > Vertical > Button {
-    margin: 1;
-    border: tall #1d2e38;
-    width: 50%;
-    background: $primary-background-darken-2;
+#homepage > Vertical > .commands-horizontal{
+    width: auto;
+    height: auto;
+    align: center middle;
+    margin-bottom: 1;
 }
 
-#homepage > Vertical > Button:hover {
+#homepage > Vertical > .commands-horizontal > Static{
+    width: auto;
+    height: auto;
+    border: blank;
+}
+
+
+#homepage > Vertical > .commands-horizontal > Button {
+    border: tall #1d2e38;
+    width: auto;
+    background: $primary-background-darken-2;
+    margin-right: 2;
+}
+
+#homepage > Vertical > .commands-horizontal > Button:hover {
     background: #2d4156;
 }
 
