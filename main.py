@@ -1,64 +1,37 @@
 import sys
 import subprocess
-from typing import List
+
+from typing import List, Tuple
+
+from rich.console import Console
 
 from tui import Tui
 
 
-def output() -> List[str]:
-    comando = "esse3-student"
+def main_output() -> Tuple[List[str], str]:
+    if len(sys.argv) != 2:
+        Console().print("pass exactly two argument!!!", style="bold yellow")
+        exit()
 
-    if len(sys.argv) < 2:
-        raise Exception("Non sono stati passati argomenti.")
-
-    argomento = sys.argv[1]
-
-    if len(sys.argv) == 2 and argomento != "--help":
-        raise Exception("L'unico argomento passato non è '--help'.")
-
-    risultato = subprocess.run(
-        [comando, argomento, "--help"],
-        capture_output=True,
-    )
-    return risultato.stdout.decode().split('\n')
-
-
-def call_button(command: str, debug: bool) -> List[str]:
-    application = "esse3-student"
-
-    """if len(sys.argv) != 3:
-        raise Exception("numero di parametri incorretto")"""
-
-    if debug:
-        result = subprocess.run(
-            [application, "--debug", command, "--help"],
-            capture_output=True,
-        )
-    else:
-        result = subprocess.run(
-            [application, command, "--help"],
-            capture_output=True,
-        )
-
-    return result.stdout.decode().split('\n')
-
-
-if __name__ == "__main__":
-    result = output()
-    Tui(result).run()
-    """application = "esse3-student"
+    application = sys.argv[1]
 
     result = subprocess.run(
-        [application, "booklet", "--help"],
+        [application, "--help"],
         capture_output=True,
     )
-    output = result.stdout.decode().split('\n')
-    start = False
+    return result.stdout.decode().split('\n'), application
+
+
+def process_commands():
+    output, app = main_output()
+    start_commands = False
+    commands = []
     for index, line in enumerate(output, start=1):
+
         if "Commands" in line:
-            start = True
-            continue
-        if start and any(word.isalpha() for word in line.split()):
+            start_commands = True
+
+        if start_commands and any(word.isalpha() for word in line.split()):
             command = line.split(" ")
             words = []
             current_word = ""
@@ -70,12 +43,48 @@ if __name__ == "__main__":
                     current_word = ""
 
             words = list(filter(bool, words))
-            print(words)"""
+            commands.append(words)
+
+    for command in commands:
+        print(commands[0])
 
 
+def process_data():
+    output, app = main_output()
+    start_options = False
+    data = {}
+    for index, line in enumerate(output, start=1):
+
+        if "Options" in line:
+            start_options = True
+            continue
+
+        if "Commands" in line:
+            start_options = False
+
+        if start_options and any(word.isalpha() for word in line.split()):
+            items = line.split(" ")
+            words = []
+            current_word = ""
+            for option in items:
+                if option and option != '│' and option != '*':
+                    current_word += " " + option
+                else:
+                    words.append(current_word.strip())
+                    current_word = ""
+
+            words = list(filter(bool, words))
+            if len(words) == 2:
+                words.insert(1, "BOOLEAN")
+            if words:
+                words[0] = words[0].replace('--', '')
+                if words[0] == "help":
+                    continue
+                data[words[0]] = [words[1], words[2]]
+
+    for k, v in data.items():
+        print(f"{v[1]}")
 
 
-    """error = risultato.stderr.decode().split('\n')
-    for line in error:
-        print(line)
-    """
+if __name__ == "__main__":
+   process_commands()

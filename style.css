@@ -28,25 +28,21 @@ Screen {
     max-height: 100%;
 }
 
-#homepage > Vertical {
-    align: center middle;
-    border: outer #1d2e38;
-    width: 100%;
-}
-
 #options {
-    border: red;
-    width: auto;
-}
-
-#login {
     content-align: center middle;
     min-height: 1;
     width: 50%;
     text-style: bold;
     background: $panel;
     border: hkey red;
-    margin-bottom: 1
+    margin-bottom: 1;
+}
+
+#interno {
+    layout: vertical;
+    align: center top;
+    overflow: auto auto;
+    border: outer #1d2e38;
 }
 
 .credentials {
@@ -84,28 +80,32 @@ Screen {
     margin-bottom: 1;
 }
 
-#homepage > Vertical > .commands-horizontal{
-    width: auto;
+.commands-horizontal{
     height: auto;
     align: center middle;
+    width: auto;
     margin-bottom: 1;
 }
 
-#homepage > Vertical > .commands-horizontal > Static{
+#homepage > #interno > .commands-horizontal > Static{
     width: auto;
     height: auto;
     border: blank;
 }
 
+#homepage > #interno> .commands-horizontal > Input{
+    width: auto;
+    height: auto;
+}
 
-#homepage > Vertical > .commands-horizontal > Button {
+#homepage > #interno > .commands-horizontal > Button {
     border: tall #1d2e38;
     width: auto;
     background: $primary-background-darken-2;
     margin-right: 2;
 }
 
-#homepage > Vertical > .commands-horizontal > Button:hover {
+#homepage > #interno > .commands-horizontal > Button:hover {
     background: #2d4156;
 }
 
