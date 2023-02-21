@@ -1,3 +1,5 @@
+import asyncio
+
 from rich.console import Console
 
 from textual.app import App, ComposeResult
@@ -116,7 +118,8 @@ class HomePage(Screen):
 
         self.query_one(Container).mount(Static(f"[green][bold]{title}", classes="title"))
         self.query_one(Container).mount(Container(id="interno"))
-        self.query_one("#interno").mount(Static("Options", id="options"))
+        if options:
+            self.query_one("#interno").mount(Static("Options", id="options"))
         for k, v in options.items():
             if v[0] == "BOOLEAN":
                 self.query_one("#interno").mount(Horizontal(
@@ -130,7 +133,9 @@ class HomePage(Screen):
                     Static(f"[bold]{v[1]}"),
                     classes="commands-horizontal"
                 ))
-        self.query_one("#interno").mount(Static("Commands", id="commands"))
+
+        if commands:
+            self.query_one("#interno").mount(Static("Commands", id="commands"))
         for command in commands:
             self.query_one("#interno").mount(Horizontal(
                 Button(f"{command[0]}", id=f"{command[0]}"),
@@ -139,17 +144,54 @@ class HomePage(Screen):
             ))
 
 
-class Command(Screen):
+class Options(Screen):
 
-    def __init__(self, output) -> None:
+    def __init__(self, output, identifier) -> None:
         self.output = output
+        self.identifier = identifier
         super().__init__()
 
     def compose(self) -> ComposeResult:
-        yield Header("Homepage", classes="header")
-        yield Vertical(id="booklet-vertical")
+        yield Header(f"{self.identifier}", classes="header")
+        yield Footer()
 
-    def process_input(self):
+    def process_arguments(self):
+        start_arguments = False
+        data = {}
+        for index, line in enumerate(self.output, start=1):
+
+            if "Arguments" in line:
+                start_arguments = True
+                continue
+
+            if "Options" in line:
+                start_arguments = False
+
+            if start_arguments and any(word.isalpha() for word in line.split()):
+                items = line.split(" ")
+                words = []
+                current_word = ""
+                for option in items:
+                    if option and option != '│' and option != '*':
+                        current_word += " " + option
+                    else:
+                        words.append(current_word.strip())
+                        current_word = ""
+
+                words = list(filter(bool, words))
+                if len(words) == 2:
+                    words.insert(1, " ")
+                if words:
+                    words[0] = words[0].replace('--', '')
+                    words[2] = words[2].replace('[', '(')
+                    words[2] = words[2].replace(']', ')')
+                    if words[0] == "help":
+                        continue
+                data[words[0]] = [words[1], words[2]]
+
+        return data
+
+    def process_options(self):
         start = False
         options = []
         for index, line in enumerate(self.output, start=1):
@@ -170,24 +212,125 @@ class Command(Screen):
                 words = list(filter(bool, words))
                 if len(words) == 2:
                     words.insert(1, "BOOLEAN")
+                if words:
+                    words[0] = words[0].replace('--', '')
+                    words[2] = words[2].replace('[', '(')
+                    words[2] = words[2].replace(']', ')')
+                    if words[0] == "help":
+                        continue
                 options.append(words)
 
         return options
 
     def on_mount(self) -> None:
-        options = self.process_input()
-        for option in options:
+        options = self.process_options()
+        arguments = self.process_arguments()
 
-            arg_str = f"[b][red]{option[1]}[/] {' '.join(option[2:])}[/]"
+        if len(arguments) != 0 or len(options) != 0:
+            self.mount(Vertical(id="booklet-vertical"))
 
-            self.query_one(Vertical).mount(Horizontal(
-                Static(f"[b][cyan]{option[0]}[/][/]", classes="name"),
-                Checkbox(),
-                Static(arg_str, classes="description"),
-                Input(placeholder="prova....", classes="input"),
-                classes="booklet-horizontal"
+        if len(arguments) != 0:
+            self.query_one(Vertical).mount(Static("Arguments", id="arguments"))
+            for k, v in arguments.items():
+                arg_str = f"[b][red]{v[0]}[/] {' '.join(v[1:])}[/]"
+                self.query_one(Vertical).mount(Horizontal(
+                    Static(f"[b][cyan]{k}[/][/]", classes="name"),
+                    Static(arg_str, classes="description"),
+                    Input(placeholder="prova....", classes="input"),
+                    classes="booklet-horizontal"
+                    )
+                )
+
+
+        if len(options) != 0:
+            self.query_one(Vertical).mount(Static("Options", id="options2"))
+            for option in options:
+                option[0] = option[0].replace('--', '').replace("-", " ")
+                arg_str = f"[b][red]{option[1]}[/] {' '.join(option[2:])}[/]"
+
+                self.query_one(Vertical).mount(Horizontal(
+                    Static(f"[b][cyan]{option[0]}[/][/]", classes="name"),
+                    Checkbox(),
+                    Static(arg_str, classes="description"),
+                    Input(placeholder="prova....", classes="input"),
+                    classes="booklet-horizontal"
+                    )
+                )
+
+        if len(arguments) == 0 and len(options) == 0:
+            self.mount(Container(
+                            Static("[bold][yellow]No arguments needed !!!\n"),
+                            Button("[bold]run command", id=f"show-{self.identifier}"),
+                            classes="empty"
+                    )
+            )
+
+        else:
+            self.query_one(Vertical).mount(
+                Horizontal(
+                    Button("show", id=f"run-{self.identifier}"),
+                    classes="booklet-horizontal",
                 )
             )
+
+    BINDINGS = [
+        Binding(key="r", action="app.pop_screen", description="return"),
+    ]
+
+
+class Show(Screen):
+
+    def __init__(self, application, command, debug, value=None) -> None:
+        self.application = application
+        self.command = command
+        self.debug = debug
+        self.value = value
+        super().__init__()
+
+    def compose(self) -> ComposeResult:
+        yield Header("Show", classes="header")
+        yield Container(
+                Static("[bold][yellow]Operation loading....", id="loading"),
+                id="c")
+        yield Footer()
+
+    async def run_button(self):
+
+        if self.value is not None:
+            if self.debug:
+                result = subprocess.run(
+                    [self.application, "--debug", self.command, self.value],
+                    capture_output=True,
+                )
+            else:
+                result = subprocess.run(
+                    [self.application, self.command, self.value],
+                    capture_output=True,
+                )
+        else:
+            if self.debug:
+                result = subprocess.run(
+                    [self.application, "--debug", self.command],
+                    capture_output=True,
+                )
+            else:
+                result = subprocess.run(
+                    [self.application, self.command],
+                    capture_output=True,
+                )
+
+        await self.query_one("#loading").remove()
+        result = result.stdout.decode().split('\n')
+        for index, line in enumerate(result, start=1):
+            await self.query_one("#c").mount(Static(f"[bold]{line}", classes="prova"))
+
+    async def on_mount(self) -> None:
+        await asyncio.sleep(0.1)
+        asyncio.create_task(self.run_button())
+
+    BINDINGS = [
+        Binding(key="r", action="app.pop_screen", description="return"),
+    ]
 
 
 class Tui(App):
@@ -246,6 +389,21 @@ class Tui(App):
 
         return result.stdout.decode().split('\n')
 
+    """def run_button(self, command: str, debug: bool) -> List[str]:
+
+        if debug:
+            result = subprocess.run(
+                [self.application, "--debug", command],
+                capture_output=True,
+            )
+        else:
+            result = subprocess.run(
+                [self.application, command],
+                capture_output=True,
+            )
+
+        return result.stdout.decode().split('\n')"""
+
     def process_data(self) -> List[str]:
         start_commands = False
         buttons = []
@@ -276,8 +434,25 @@ class Tui(App):
         if event.button.id in buttons:
             debug = self.query("Checkbox").first().value
             result = self.call_button(event.button.id, debug)
-            self.install_screen(Command(result), name=event.button.id)
+            if not self.is_screen_installed(event.button.id):
+                self.install_screen(Options(result, event.button.id), name=event.button.id)
             self.push_screen(event.button.id)
+        elif event.button.id.startswith("show-"):
+            command = event.button.id.replace("show-", "")
+            debug = self.query("Checkbox").first().value
+            if not self.is_screen_installed(event.button.id):
+                self.install_screen(Show(self.application, command, debug), name=event.button.id)
+            self.push_screen(event.button.id)
+        elif event.button.id.startswith("run-"):
+            value = self.query_one(".input").value
+            debug = self.query("Checkbox").first().value
+            command = event.button.id.replace("run-", "")
+            if not self.is_screen_installed(event.button.id):
+                self.install_screen(Show(self.application, command, debug, value), name=event.button.id)
+            self.push_screen(event.button.id)
+
+    def action_pop_screen(self):
+        self.uninstall_screen(self.pop_screen())
 
 
 if __name__ == "__main__":

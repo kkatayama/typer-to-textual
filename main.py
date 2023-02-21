@@ -9,14 +9,12 @@ from tui import Tui
 
 
 def main_output() -> Tuple[List[str], str]:
-    if len(sys.argv) != 2:
-        Console().print("pass exactly two argument!!!", style="bold yellow")
-        exit()
 
     application = sys.argv[1]
+    command = sys.argv[2]
 
     result = subprocess.run(
-        [application, "--help"],
+        [application, command, "--help"],
         capture_output=True,
     )
     return result.stdout.decode().split('\n'), application
@@ -27,8 +25,8 @@ def process_commands():
     start_commands = False
     commands = []
     for index, line in enumerate(output, start=1):
-
-        if "Commands" in line:
+        print(line)
+        """if "Commands" in line:
             start_commands = True
 
         if start_commands and any(word.isalpha() for word in line.split()):
@@ -46,7 +44,7 @@ def process_commands():
             commands.append(words)
 
     for command in commands:
-        print(commands[0])
+        print(commands[0])"""
 
 
 def process_data():
@@ -86,5 +84,43 @@ def process_data():
         print(f"{v[1]}")
 
 
+def process_arguments():
+    output, app = main_output()
+    start_arguments = False
+    data = {}
+    for index, line in enumerate(output, start=1):
+
+        if "Arguments" in line:
+            start_arguments = True
+            continue
+
+        if "Options" in line:
+            start_arguments = False
+
+        if start_arguments and any(word.isalpha() for word in line.split()):
+            items = line.split(" ")
+            words = []
+            current_word = ""
+            for option in items:
+                if option and option != '│' and option != '*':
+                    current_word += " " + option
+                else:
+                    words.append(current_word.strip())
+                    current_word = ""
+
+            words = list(filter(bool, words))
+            if len(words) == 2:
+                words.insert(1, " ")
+            if words:
+                words[2] = words[2].replace('[', '(')
+                words[2] = words[2].replace(']', ')')
+                if words[0] == "help":
+                    continue
+            data[words[0]] = [words[1], words[2]]
+
+    for k, v in data.items():
+        print(v[1])
+
+
 if __name__ == "__main__":
-   process_commands()
+   output = process_arguments()
