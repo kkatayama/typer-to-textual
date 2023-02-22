@@ -94,7 +94,7 @@ Screen {
 }
 
 #homepage > #interno> .commands-horizontal > Input{
-    width: auto;
+    width: 20%;
     height: auto;
 }
 
@@ -166,19 +166,26 @@ Screen {
     border: #ec971f;
 }
 
-.empty > Static{
+.empty >Horizontal{
+    width: 100%;
+    border: blank;
+    height: auto;
+    align: center middle;
+}
+
+.empty > Horizontal > Static{
     content-align: center middle;
     width: auto;
 }
 
-.empty > Button {
+.empty > Horizontal > Button {
     border: tall #1d2e38;
     width: auto;
     background: $primary-background-darken-2;
     margin-right: 2;
 }
 
-.empty > Button:hover {
+.empty > Horizontal > Button:hover {
     background: #2d4156;
 }
 

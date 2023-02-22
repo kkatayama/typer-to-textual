@@ -128,11 +128,18 @@ class HomePage(Screen):
                     classes="commands-horizontal"
                 ))
             else:
-                self.query_one("#interno").mount(Horizontal(
-                    Input(placeholder=f"{k}...."),
-                    Static(f"[bold]{v[1]}"),
-                    classes="commands-horizontal"
-                ))
+                if k =="password":
+                    self.query_one("#interno").mount(Horizontal(
+                        Input(placeholder=f"{k}....", password=True),
+                        Static(f"[bold]{v[1]}"),
+                        classes="commands-horizontal"
+                    ))
+                else:
+                    self.query_one("#interno").mount(Horizontal(
+                        Input(placeholder=f"{k}...."),
+                        Static(f"[bold]{v[1]}"),
+                        classes="commands-horizontal"
+                    ))
 
         if commands:
             self.query_one("#interno").mount(Static("Commands", id="commands"))
@@ -258,8 +265,8 @@ class Options(Screen):
 
         if len(arguments) == 0 and len(options) == 0:
             self.mount(Container(
-                            Static("[bold][yellow]No arguments needed !!!\n"),
-                            Button("[bold]run command", id=f"show-{self.identifier}"),
+                            Horizontal(Static("[bold][yellow]No arguments or options needed !!!\n")),
+                            Horizontal(Button("[bold]Run command", id=f"show-{self.identifier}")),
                             classes="empty"
                     )
             )
