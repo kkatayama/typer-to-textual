@@ -236,11 +236,10 @@ class Options(Screen):
                 self.query_one(Vertical).mount(Horizontal(
                     Static(f"[b][cyan]{k}[/][/]", classes="name"),
                     Static(arg_str, classes="description"),
-                    Input(placeholder="prova....", classes="input"),
+                    Input(placeholder=f"{k}....", classes="input"),
                     classes="booklet-horizontal"
                     )
                 )
-
 
         if len(options) != 0:
             self.query_one(Vertical).mount(Static("Options", id="options2"))
@@ -252,7 +251,7 @@ class Options(Screen):
                     Static(f"[b][cyan]{option[0]}[/][/]", classes="name"),
                     Checkbox(),
                     Static(arg_str, classes="description"),
-                    Input(placeholder="prova....", classes="input"),
+                    Input(placeholder=f"{k}....", classes="input"),
                     classes="booklet-horizontal"
                     )
                 )
@@ -280,31 +279,31 @@ class Options(Screen):
 
 class Show(Screen):
 
-    def __init__(self, application, command, debug, value=None) -> None:
+    def __init__(self, application, command, debug, values=None) -> None:
         self.application = application
         self.command = command
         self.debug = debug
-        self.value = value
+        self.values = values
         super().__init__()
 
     def compose(self) -> ComposeResult:
         yield Header("Show", classes="header")
         yield Container(
-                Static("[bold][yellow]Operation loading....", id="loading"),
+                Static("[bold][yellow]Operation in progress....", id="loading"),
                 id="c")
         yield Footer()
 
     async def run_button(self):
 
-        if self.value is not None:
+        if self.values is not None:
             if self.debug:
                 result = subprocess.run(
-                    [self.application, "--debug", self.command, self.value],
+                    [self.application, "--debug", self.command, self.values],
                     capture_output=True,
                 )
             else:
                 result = subprocess.run(
-                    [self.application, self.command, self.value],
+                    [self.application, self.command, self.values],
                     capture_output=True,
                 )
         else:
@@ -444,11 +443,11 @@ class Tui(App):
                 self.install_screen(Show(self.application, command, debug), name=event.button.id)
             self.push_screen(event.button.id)
         elif event.button.id.startswith("run-"):
-            value = self.query_one(".input").value
+            values = self.query_one(".input").value
             debug = self.query("Checkbox").first().value
             command = event.button.id.replace("run-", "")
             if not self.is_screen_installed(event.button.id):
-                self.install_screen(Show(self.application, command, debug, value), name=event.button.id)
+                self.install_screen(Show(self.application, command, debug, values), name=event.button.id)
             self.push_screen(event.button.id)
 
     def action_pop_screen(self):
