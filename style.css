@@ -76,11 +76,12 @@ Screen {
     text-style: bold;
     background: $panel;
     border: hkey seagreen;
-    margin-top: 5;
     margin-bottom: 1;
+    margin-top: 1;
 }
 
 .commands-horizontal{
+    margin-top: 1;
     height: auto;
     align: center middle;
     width: auto;

@@ -1,363 +1,43 @@
-import asyncio
-
-from rich.console import Console
-
-from textual.app import App, ComposeResult
-from textual.binding import Binding
-from textual.widgets import Static, Button, Footer, Input, Checkbox
-from textual.containers import Container, Vertical, Horizontal
-from textual.screen import Screen
-from textual import events
-from textual.pilot import Pilot
-from rich.text import Text
-
-import typer
-
-from typing import List, Tuple
-
-
 import sys
 import subprocess
-from typing import List
+
+from textual.app import App
+from textual.binding import Binding
+from textual.widgets import Button
+from textual import events
+from textual.pilot import Pilot
+
+from typing import Tuple, List
+
+from typer_to_textual.command_options import CommandOptions
+from typer_to_textual.homepage import HomePage
+from typer_to_textual.show import Show
 
 
-class Header(Static):
-    pass
+def homepage_output() -> Tuple[List[str], str]:
 
+    try:
+        if len(sys.argv) != 2:
+            raise RuntimeError("pass exactly two arguments")
+    except RuntimeError as e:
+        print(f"Error: {str(e)}")
+        exit()
 
-class HomePage(Screen):
+    application = sys.argv[1]
 
-    def __init__(self, output) -> None:
-        self.output = output
-        super().__init__()
+    result = subprocess.run(
+        [application, "--help"],
+        capture_output=True,
+    )
 
-    def process_title(self) -> str:
-        title = ""
-        for index, line in enumerate(self.output, start=1):
-            if index == 4:
-                title = line
-                break
-        if title == "":
-            title = "User interface utility"
-
-        return title.strip()
-
-    def process_options(self):
-        start_options = False
-        data = {}
-        for index, line in enumerate(self.output, start=1):
-
-            if "Options" in line:
-                start_options = True
-                continue
-
-            if "Commands" in line:
-                start_options = False
-
-            if start_options and any(word.isalpha() for word in line.split()):
-                items = line.split(" ")
-                words = []
-                current_word = ""
-                for option in items:
-                    if option and option != '│' and option != '*':
-                        current_word += " " + option
-                    else:
-                        words.append(current_word.strip())
-                        current_word = ""
-
-                words = list(filter(bool, words))
-                if len(words) == 2:
-                    words.insert(1, "BOOLEAN")
-                if words:
-                    words[0] = words[0].replace('--', '')
-                    words[2] = words[2].replace('[', '(')
-                    words[2] = words[2].replace(']', ')')
-                    if words[0] == "help":
-                        continue
-                    data[words[0]] = [words[1], words[2]]
-
-        return data
-
-    def process_commands(self):
-        start_commands = False
-        commands = []
-        for index, line in enumerate(self.output, start=1):
-
-            if "Commands" in line:
-                start_commands = True
-                continue
-
-            if start_commands and any(word.isalpha() for word in line.split()):
-                command = line.split(" ")
-                words = []
-                current_word = ""
-                for item in command:
-                    if item and item != '│':
-                        current_word += " " + item
-                    else:
-                        words.append(current_word.strip())
-                        current_word = ""
-
-                words = list(filter(bool, words))
-                commands.append(words)
-
-        return commands
-
-    def compose(self) -> ComposeResult:
-        yield Header("Homepage", classes="header")
-        yield Container(
-            id="homepage"
-        )
-        yield Footer()
-
-    def on_mount(self) -> None:
-
-        options = self.process_options()
-        title = self.process_title()
-        commands = self.process_commands()
-
-        self.query_one(Container).mount(Static(f"[green][bold]{title}", classes="title"))
-        self.query_one(Container).mount(Container(id="interno"))
-        if options:
-            self.query_one("#interno").mount(Static("Options", id="options"))
-        for k, v in options.items():
-            if v[0] == "BOOLEAN":
-                self.query_one("#interno").mount(Horizontal(
-                    Static(f"[bold]{v[1]}"),
-                    Checkbox(),
-                    classes="commands-horizontal"
-                ))
-            else:
-                if k =="password":
-                    self.query_one("#interno").mount(Horizontal(
-                        Input(placeholder=f"{k}....", password=True),
-                        Static(f"[bold]{v[1]}"),
-                        classes="commands-horizontal"
-                    ))
-                else:
-                    self.query_one("#interno").mount(Horizontal(
-                        Input(placeholder=f"{k}...."),
-                        Static(f"[bold]{v[1]}"),
-                        classes="commands-horizontal"
-                    ))
-
-        if commands:
-            self.query_one("#interno").mount(Static("Commands", id="commands"))
-        for command in commands:
-            self.query_one("#interno").mount(Horizontal(
-                Button(f"{command[0]}", id=f"{command[0]}"),
-                Static(f"[bold][#E1C699]{command[1]}"),
-                classes="commands-horizontal"
-            ))
-
-
-class Options(Screen):
-
-    def __init__(self, output, identifier) -> None:
-        self.output = output
-        self.identifier = identifier
-        super().__init__()
-
-    def compose(self) -> ComposeResult:
-        yield Header(f"{self.identifier}", classes="header")
-        yield Footer()
-
-    def process_arguments(self):
-        start_arguments = False
-        data = {}
-        for index, line in enumerate(self.output, start=1):
-
-            if "Arguments" in line:
-                start_arguments = True
-                continue
-
-            if "Options" in line:
-                start_arguments = False
-
-            if start_arguments and any(word.isalpha() for word in line.split()):
-                items = line.split(" ")
-                words = []
-                current_word = ""
-                for option in items:
-                    if option and option != '│' and option != '*':
-                        current_word += " " + option
-                    else:
-                        words.append(current_word.strip())
-                        current_word = ""
-
-                words = list(filter(bool, words))
-                if len(words) == 2:
-                    words.insert(1, " ")
-                if words:
-                    words[0] = words[0].replace('--', '')
-                    words[2] = words[2].replace('[', '(')
-                    words[2] = words[2].replace(']', ')')
-                    if words[0] == "help":
-                        continue
-                data[words[0]] = [words[1], words[2]]
-
-        return data
-
-    def process_options(self):
-        start = False
-        options = []
-        for index, line in enumerate(self.output, start=1):
-            if "Options" in line:
-                start = True
-                continue
-            if start and any(word.isalpha() for word in line.split()):
-                command = line.split(" ")
-                words = []
-                current_word = ""
-                for item in command:
-                    if item and item != '│':
-                        current_word += " " + item
-                    else:
-                        words.append(current_word.strip())
-                        current_word = ""
-
-                words = list(filter(bool, words))
-                if len(words) == 2:
-                    words.insert(1, "BOOLEAN")
-                if words:
-                    words[0] = words[0].replace('--', '')
-                    words[2] = words[2].replace('[', '(')
-                    words[2] = words[2].replace(']', ')')
-                    if words[0] == "help":
-                        continue
-                options.append(words)
-
-        return options
-
-    def on_mount(self) -> None:
-        options = self.process_options()
-        arguments = self.process_arguments()
-
-        if len(arguments) != 0 or len(options) != 0:
-            self.mount(Vertical(id="booklet-vertical"))
-
-        if len(arguments) != 0:
-            self.query_one(Vertical).mount(Static("Arguments", id="arguments"))
-            for k, v in arguments.items():
-                arg_str = f"[b][red]{v[0]}[/] {' '.join(v[1:])}[/]"
-                self.query_one(Vertical).mount(Horizontal(
-                    Static(f"[b][cyan]{k}[/][/]", classes="name"),
-                    Static(arg_str, classes="description"),
-                    Input(placeholder=f"{k}....", classes="input"),
-                    classes="booklet-horizontal"
-                    )
-                )
-
-        if len(options) != 0:
-            self.query_one(Vertical).mount(Static("Options", id="options2"))
-            for option in options:
-                option[0] = option[0].replace('--', '').replace("-", " ")
-                arg_str = f"[b][red]{option[1]}[/] {' '.join(option[2:])}[/]"
-
-                self.query_one(Vertical).mount(Horizontal(
-                    Static(f"[b][cyan]{option[0]}[/][/]", classes="name"),
-                    Checkbox(),
-                    Static(arg_str, classes="description"),
-                    Input(placeholder=f"{k}....", classes="input"),
-                    classes="booklet-horizontal"
-                    )
-                )
-
-        if len(arguments) == 0 and len(options) == 0:
-            self.mount(Container(
-                            Horizontal(Static("[bold][yellow]No arguments or options needed !!!\n")),
-                            Horizontal(Button("[bold]Run command", id=f"show-{self.identifier}")),
-                            classes="empty"
-                    )
-            )
-
-        else:
-            self.query_one(Vertical).mount(
-                Horizontal(
-                    Button("show", id=f"run-{self.identifier}"),
-                    classes="booklet-horizontal",
-                )
-            )
-
-    BINDINGS = [
-        Binding(key="r", action="app.pop_screen", description="return"),
-    ]
-
-
-class Show(Screen):
-
-    def __init__(self, application, command, debug, values=None) -> None:
-        self.application = application
-        self.command = command
-        self.debug = debug
-        self.values = values
-        super().__init__()
-
-    def compose(self) -> ComposeResult:
-        yield Header("Show", classes="header")
-        yield Container(
-                Static("[bold][yellow]Operation in progress....", id="loading"),
-                id="c")
-        yield Footer()
-
-    async def run_button(self):
-
-        if self.values is not None:
-            if self.debug:
-                result = subprocess.run(
-                    [self.application, "--debug", self.command, self.values],
-                    capture_output=True,
-                )
-            else:
-                result = subprocess.run(
-                    [self.application, self.command, self.values],
-                    capture_output=True,
-                )
-        else:
-            if self.debug:
-                result = subprocess.run(
-                    [self.application, "--debug", self.command],
-                    capture_output=True,
-                )
-            else:
-                result = subprocess.run(
-                    [self.application, self.command],
-                    capture_output=True,
-                )
-
-        await self.query_one("#loading").remove()
-        result = result.stdout.decode().split('\n')
-        for index, line in enumerate(result, start=1):
-            await self.query_one("#c").mount(Static(f"[bold]{line}", classes="prova"))
-
-    async def on_mount(self) -> None:
-        await asyncio.sleep(0.1)
-        asyncio.create_task(self.run_button())
-
-    BINDINGS = [
-        Binding(key="r", action="app.pop_screen", description="return"),
-    ]
+    return result.stdout.decode().split('\n'), application
 
 
 class Tui(App):
 
     def __init__(self) -> None:
-        self.output, self.application = self.main_output()
+        self.output, self.application = homepage_output()
         super().__init__()
-
-    def main_output(self) -> Tuple[List[str], str]:
-
-        if len(sys.argv) != 2:
-            Console().print("pass exactly two argument!!!", style="bold yellow")
-            exit()
-
-        application = sys.argv[1]
-
-        result = subprocess.run(
-            [application, "--help"],
-            capture_output=True,
-        )
-        return result.stdout.decode().split('\n'), application
 
     CSS_PATH = "style.css"
 
@@ -380,37 +60,16 @@ class Tui(App):
     def action_key_escape(self) -> None:
         self.exit()
 
-    def call_button(self, command: str, debug: bool) -> List[str]:
+    def call_button(self, command: str) -> List[str]:
 
-        if debug:
-            result = subprocess.run(
-                [self.application, "--debug", command, "--help"],
-                capture_output=True,
-            )
-        else:
-            result = subprocess.run(
-                [self.application, command, "--help"],
-                capture_output=True,
-            )
+        result = subprocess.run(
+            [self.application, command, "--help"],
+            capture_output=True,
+        )
 
         return result.stdout.decode().split('\n')
 
-    """def run_button(self, command: str, debug: bool) -> List[str]:
-
-        if debug:
-            result = subprocess.run(
-                [self.application, "--debug", command],
-                capture_output=True,
-            )
-        else:
-            result = subprocess.run(
-                [self.application, command],
-                capture_output=True,
-            )
-
-        return result.stdout.decode().split('\n')"""
-
-    def process_data(self) -> List[str]:
+    def buttons(self) -> List[str]:
         start_commands = False
         buttons = []
         for index, line in enumerate(self.output, start=1):
@@ -436,26 +95,71 @@ class Tui(App):
         return buttons
 
     def on_button_pressed(self, event: Button.Pressed):
-        buttons = self.process_data()
+
+        buttons = self.buttons()
+
         if event.button.id in buttons:
-            debug = self.query("Checkbox").first().value
-            result = self.call_button(event.button.id, debug)
+
+            result = self.call_button(event.button.id)
             if not self.is_screen_installed(event.button.id):
-                self.install_screen(Options(result, event.button.id), name=event.button.id)
+                self.install_screen(CommandOptions(result, event.button.id), name=event.button.id)
             self.push_screen(event.button.id)
+
         elif event.button.id.startswith("show-"):
+
+            homepage_checkbox_elements = self.query_one(HomePage).query("Checkbox")
+            homepage_checkbox_data = {}
+            for element in homepage_checkbox_elements:
+                if str(element.value) == "False":
+                    continue
+                homepage_checkbox_data[element.id] = "BOOL"
+
+            homepage_input_elements = self.query_one(HomePage).query("Input")
+            homepage_input_data = {}
+            for element in homepage_input_elements:
+                if element.value == '':
+                    continue
+                homepage_input_data[element.id] = element.value
+
+            homepage_data = {}
+            homepage_data.update(homepage_checkbox_data)
+            homepage_data.update(homepage_input_data)
+
+            """command_checkbox_elements = self.query_one(CommandOptions).query("Checkbox")
+            command_checkbox_data = {}
+            for element in command_checkbox_elements:
+                command_checkbox_data[element.id] = element.value
+
+            command_input_elements = self.query_one(CommandOptions).query("Input")
+            command_input_data = {}
+            for element in command_input_elements:
+                command_input_data[element.id] = element.value"""
+
             command = event.button.id.replace("show-", "")
-            debug = self.query("Checkbox").first().value
+
             if not self.is_screen_installed(event.button.id):
-                self.install_screen(Show(self.application, command, debug), name=event.button.id)
+                self.install_screen(Show(self.application, command, homepage_data), name=event.button.id)
             self.push_screen(event.button.id)
-        elif event.button.id.startswith("run-"):
-            values = self.query_one(".input").value
+
+
+
+
+        """elif event.button.id.startswith("run-"):
+            #values = self.query_one(".input").value
+
+
+
             debug = self.query("Checkbox").first().value
             command = event.button.id.replace("run-", "")
+
+            inputs = self.query_one(HomePage).query("Input")
+            data = {}
+            for i in inputs:
+                data[i.id] = i.value
+
             if not self.is_screen_installed(event.button.id):
-                self.install_screen(Show(self.application, command, debug, values), name=event.button.id)
-            self.push_screen(event.button.id)
+                self.install_screen(Show(self.application, command, debug, data), name=event.button.id)
+            self.push_screen(event.button.id)"""
 
     def action_pop_screen(self):
         self.uninstall_screen(self.pop_screen())

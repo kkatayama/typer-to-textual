@@ -123,4 +123,14 @@ def process_arguments():
 
 
 if __name__ == "__main__":
-   output = process_arguments()
+    average_to_achieve = sys.argv[1]
+    weighted_average = sys.argv[2]
+    weighted_average.replace(",", ".")
+    remaining_cfu = sys.argv[3]
+    first = (float(average_to_achieve) * 120)
+    second = (float(weighted_average) * float(96))
+    grade_to_obtain = (first - second) \
+                      / float(remaining_cfu)
+    print(first)
+    print(second)
+    print(grade_to_obtain)
