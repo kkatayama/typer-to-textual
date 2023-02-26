@@ -118,16 +118,34 @@ Screen {
 }
 
 .booklet-horizontal {
-    border: #ebccd1;
+    border: outer #1d2e38;
     width: 100%;
     height: auto;
     align: center middle;
+    margin-top: 1;
+}
+
+.booklet-horizontal-button {
+    width: 100%;
+    height: auto;
+    align: center middle;
+    margin-top: 1;
+}
+
+.booklet-horizontal-button > Button {
+    border: tall #1d2e38;
+    width: auto;
+    background: $primary-background-darken-2;
+    margin-right: 2;
+}
+
+.booklet-horizontal-button > Button:hover {
+    background: #2d4156;
 }
 
 .booklet-horizontal > Checkbox {
     height: auto;
     width: auto;
-    margin-right: 3;
 }
 
 .booklet-horizontal > .description {
@@ -135,9 +153,20 @@ Screen {
     width: 50%;
 }
 
+.booklet-horizontal > .types {
+    border: blank;
+    width: 10%;
+}
+
 .booklet-horizontal > .name {
     border: blank;
     width: 15%;
+}
+
+.booklet-horizontal > .blank {
+    width: 15%;
+    dock: right;
+    background: $panel;
 }
 
 .booklet-horizontal > .input {
@@ -190,25 +219,6 @@ Screen {
     background: #2d4156;
 }
 
-#c {
-    layout: vertical;
-    overflow: auto auto;
-    border: double #ec971f;
-    align: center middle;
-}
-
-#c > #loading{
-    content-align: center middle;
-    width: 100%;
-    height: auto;
-}
-
-.prova {
-    width: auto;
-    height: auto;
-    content-align: center middle;
-}
-
 #arguments {
     margin-top: 1;
     content-align: center middle;
@@ -226,3 +236,25 @@ Screen {
     text-style: bold;
     border: hkey green;
 }
+
+/* SHOW */
+
+#show-container {
+    layout: vertical;
+    overflow: auto auto;
+    border: double #ec971f;
+    align: center middle;
+}
+
+#show-container > #loading{
+    content-align: center middle;
+    width: 100%;
+    height: auto;
+}
+
+.output {
+    width: auto;
+    height: auto;
+    content-align: center middle;
+}
+

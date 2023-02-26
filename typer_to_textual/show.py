@@ -14,46 +14,42 @@ class Header(Static):
 
 class Show(Screen):
 
-    def __init__(self, application, command, homepage_data=None) -> None:
+    def __init__(self, application, command, homepage_data=None, command_data=None) -> None:
         self.application = application
         self.command = command
         self.homepage_data = homepage_data
+        self.command_data = command_data
         super().__init__()
 
     def compose(self) -> ComposeResult:
         yield Header("Show", classes="header")
         yield Container(
                 Static("[bold][yellow]Operation in progress....", id="loading"),
-                id="c")
+                id="show-container")
         yield Footer()
 
     async def run_button(self):
 
-        if len(self.homepage_data) > 0:
+        args = [self.application]
 
-            args = [self.application]
-            for key, value in self.homepage_data.items():
-                if value == "BOOL":
-                    args.append(key)
-                else:
-                    args.append(key)
-                    args.append(value)
+        for key, value in self.homepage_data.items():
+            args.append(key)
+            if value != "BOOL":
+                args.append(value)
 
-            args.append(self.command)
+        args.append(self.command)
 
-            result = subprocess.run(args, capture_output=True)
+        for key, value in self.command_data.items():
+            args.append(key)
+            if value != "BOOL":
+                args.append(value)
 
-        else:
-
-            result = subprocess.run(
-                [self.application, self.command],
-                capture_output=True,
-            )
+        result = subprocess.run(args, capture_output=True)
 
         await self.query_one("#loading").remove()
         result = result.stdout.decode().split('\n')
-        for index, line in enumerate(result, start=1):
-            await self.query_one("#c").mount(Static(f"[bold]{line}", classes="prova"))
+        for row in result:
+            await self.query_one("#show-container").mount(Static(f"[bold]{row}", classes="output"))
 
     async def on_mount(self) -> None:
         await asyncio.sleep(0.1)

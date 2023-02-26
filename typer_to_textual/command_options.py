@@ -77,6 +77,14 @@ class CommandOptions(Screen):
                 words = list(filter(bool, words))
                 if len(words) == 2:
                     words.insert(1, "BOOLEAN")
+
+                types = ["INTEGER", "BOOLEAN", "TEXT"]
+                if len(words) == 3 and words[1] not in types:
+                    words[1] = "BOOLEAN"
+
+                if len(words) == 4 and words[1] not in types:
+                    words[1] = words[2]
+
                 if words:
                     words[0] = words[0].replace('--', '')
                     words[2] = words[2].replace('[', '(')
@@ -110,17 +118,26 @@ class CommandOptions(Screen):
         if len(options) != 0:
             self.query_one(Vertical).mount(Static("Options", id="options2"))
             for option in options:
-                option[0] = option[0].replace('--', '').replace("-", " ")
-                arg_str = f"[b][red]{option[1]}[/] {' '.join(option[2:])}[/]"
 
-                self.query_one(Vertical).mount(Horizontal(
-                    Static(f"[b][cyan]{option[0]}[/][/]", classes="name"),
-                    Checkbox(),
-                    Static(arg_str, classes="description"),
-                    Input(placeholder=f"{option[0]}....", classes="input"),
-                    classes="booklet-horizontal"
+                if option[1] != "BOOLEAN":
+                    self.query_one(Vertical).mount(Horizontal(
+                        Static(f"[b][cyan]{option[0]}[/][/]", classes="name"),
+                        Static(f"[b][red]{option[1]}[/]", classes="types"),
+                        Static(f"[b]{' '.join(option[2:])}[/]", classes="description"),
+                        Input(placeholder=f"{option[0]}....", classes="input", id=f"--{option[0]}"),
+                        classes="booklet-horizontal"
+                        )
                     )
-                )
+
+                else:
+                    self.query_one(Vertical).mount(Horizontal(
+                        Static(f"[b][cyan]{option[0]}[/][/]", classes="name"),
+                        Static(f"[b][red]{option[1]}[/]", classes="types"),
+                        Static(f"[b]{' '.join(option[2:])}[/]", classes="description"),
+                        Checkbox(id=f"--{option[0]}"),
+                        classes="booklet-horizontal"
+                        )
+                    )
 
         if len(arguments) == 0 and len(options) == 0:
             self.mount(Container(
@@ -134,7 +151,7 @@ class CommandOptions(Screen):
             self.query_one(Vertical).mount(
                 Horizontal(
                     Button("show", id=f"show-{self.identifier}"),
-                    classes="booklet-horizontal",
+                    classes="booklet-horizontal-button",
                     )
             )
 

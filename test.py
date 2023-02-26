@@ -8,16 +8,14 @@ from rich.console import Console
 from tui import Tui
 
 
-def main_output() -> Tuple[List[str], str]:
+def main_output() -> List[str]:
 
-    application = sys.argv[1]
-    command = sys.argv[2]
 
     result = subprocess.run(
-        [application, command, "--help"],
+        ["esse3-student", "booklet", "--help"],
         capture_output=True,
     )
-    return result.stdout.decode().split('\n'), application
+    return result.stdout.decode().split('\n')
 
 
 def process_commands():
@@ -121,9 +119,40 @@ def process_arguments():
     for k, v in data.items():
         print(v[1])
 
+def options(output):
+    start = False
+    options = []
+    for index, line in enumerate(output, start=1):
+        if "Options" in line:
+            start = True
+            continue
+        if start and any(word.isalpha() for word in line.split()):
+            command = line.split(" ")
+            words = []
+            current_word = ""
+            for item in command:
+                if item and item != '│':
+                    current_word += " " + item
+                else:
+                    words.append(current_word.strip())
+                    current_word = ""
+
+            words = list(filter(bool, words))
+            if len(words) == 2:
+                words.insert(1, "BOOLEAN")
+            if words:
+                words[0] = words[0].replace('--', '').replace("-", " ")
+                words[2] = words[2].replace('[', '(')
+                words[2] = words[2].replace(']', ')')
+                if words[0] == "help":
+                    continue
+            options.append(words)
+
+    return options
+
 
 if __name__ == "__main__":
-    average_to_achieve = sys.argv[1]
+    """average_to_achieve = sys.argv[1]
     weighted_average = sys.argv[2]
     weighted_average.replace(",", ".")
     remaining_cfu = sys.argv[3]
@@ -133,4 +162,11 @@ if __name__ == "__main__":
                       / float(remaining_cfu)
     print(first)
     print(second)
-    print(grade_to_obtain)
+    print(grade_to_obtain)"""
+
+    output = main_output()
+    options = options(output)
+
+    for o in options:
+        print(o)
+

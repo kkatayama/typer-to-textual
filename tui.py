@@ -100,66 +100,38 @@ class Tui(App):
 
         if event.button.id in buttons:
 
-            result = self.call_button(event.button.id)
             if not self.is_screen_installed(event.button.id):
+                result = self.call_button(event.button.id)
                 self.install_screen(CommandOptions(result, event.button.id), name=event.button.id)
             self.push_screen(event.button.id)
 
         elif event.button.id.startswith("show-"):
 
-            homepage_checkbox_elements = self.query_one(HomePage).query("Checkbox")
-            homepage_checkbox_data = {}
-            for element in homepage_checkbox_elements:
-                if str(element.value) == "False":
-                    continue
-                homepage_checkbox_data[element.id] = "BOOL"
-
-            homepage_input_elements = self.query_one(HomePage).query("Input")
-            homepage_input_data = {}
-            for element in homepage_input_elements:
-                if element.value == '':
-                    continue
-                homepage_input_data[element.id] = element.value
-
             homepage_data = {}
-            homepage_data.update(homepage_checkbox_data)
-            homepage_data.update(homepage_input_data)
 
-            """command_checkbox_elements = self.query_one(CommandOptions).query("Checkbox")
-            command_checkbox_data = {}
-            for element in command_checkbox_elements:
-                command_checkbox_data[element.id] = element.value
+            for element in self.query_one(HomePage).query("Checkbox"):
+                if str(element.value) == "True":
+                    homepage_data[element.id] = "BOOL"
 
-            command_input_elements = self.query_one(CommandOptions).query("Input")
-            command_input_data = {}
-            for element in command_input_elements:
-                command_input_data[element.id] = element.value"""
+            for element in self.query_one(HomePage).query("Input"):
+                if element.value != '':
+                    homepage_data[element.id] = element.value
+
+            command_data = {}
+
+            for element in self.query(CommandOptions).last().query("Checkbox"):
+                if str(element.value) == "True":
+                    command_data[element.id] = "BOOL"
+
+            for element in self.query(CommandOptions).last().query("Input"):
+                if element.value != '':
+                    command_data[element.id] = element.value
 
             command = event.button.id.replace("show-", "")
 
             if not self.is_screen_installed(event.button.id):
-                self.install_screen(Show(self.application, command, homepage_data), name=event.button.id)
+                self.install_screen(Show(self.application, command, homepage_data, command_data), name=event.button.id)
             self.push_screen(event.button.id)
-
-
-
-
-        """elif event.button.id.startswith("run-"):
-            #values = self.query_one(".input").value
-
-
-
-            debug = self.query("Checkbox").first().value
-            command = event.button.id.replace("run-", "")
-
-            inputs = self.query_one(HomePage).query("Input")
-            data = {}
-            for i in inputs:
-                data[i.id] = i.value
-
-            if not self.is_screen_installed(event.button.id):
-                self.install_screen(Show(self.application, command, debug, data), name=event.button.id)
-            self.push_screen(event.button.id)"""
 
     def action_pop_screen(self):
         self.uninstall_screen(self.pop_screen())
