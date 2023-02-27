@@ -1,7 +1,7 @@
 
 from textual.app import ComposeResult
 from textual.widgets import Static, Button, Footer, Input, Checkbox
-from textual.containers import Container, Horizontal
+from textual.containers import Container, Horizontal, Vertical
 from textual.screen import Screen
 
 
@@ -21,7 +21,7 @@ class HomePage(Screen):
             if index == 4:
                 title = line
                 break
-        if title == "":
+        if title == "" or "Options" in title:
             title = "User interface utility"
 
         return title.strip()
@@ -40,7 +40,7 @@ class HomePage(Screen):
                 start_options = False
                 start_commands = True
                 continue
-            if start_options and any(word.isalpha() for word in line.split()):
+            if start_options:
                 items = line.split(" ")
                 words = []
                 current_word = ""
@@ -50,15 +50,31 @@ class HomePage(Screen):
                     else:
                         words.append(current_word.strip())
                         current_word = ""
+
                 words = list(filter(bool, words))
-                if len(words) == 2:
-                    words.insert(1, "BOOLEAN")
+
                 if words:
+
+                    if ',' in words[0]:
+                        words[0] = words[0].split(",")[0]
+
+                    if len(words) > 1:
+                        if words[1].startswith("-"):
+                            words.remove(words[1])
                     words[0] = words[0].replace('--', '')
+                    if len(words) == 1:
+                        words.append("BOOLEAN")
+                    if len(words) == 2:
+                        types = ["INTEGER", "FLOAT", "TEXT", "[", "<", "UUID", "PATH", "FILENAME", "BOOLEAN"]
+                        if not any(words[1].replace('[', '(').replace('<', '(').startswith(t) for t in types):
+                            words.insert(1, "BOOLEAN")
+                    if len(words) == 2:
+                        words.append("No description")
                     words[2] = words[2].replace('[', '(').replace(']', ')')
                     if words[0] == "help":
                         continue
-                    options[words[0]] = [words[1], words[2]]
+                    options[words[0]] = words[1:]
+
             elif start_commands and any(word.isalpha() for word in line.split()):
                 command = line.split(" ")
                 words = []
@@ -76,49 +92,53 @@ class HomePage(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header("Homepage", classes="header")
-        yield Container(
-            id="homepage"
-        )
+
         yield Footer()
 
     def on_mount(self) -> None:
 
         title = self.title()
-        self.query_one(Container).mount(Static(f"[green][bold]{title}", classes="title"))
+        self.mount(Static(f"[green][bold]{title}", classes="title"))
+        self.mount(Vertical(id="homepage-vertical"))
 
         options, commands = self.parse_output()
-        self.query_one(Container).mount(Container(id="interno"))
 
         if options:
-            self.query_one("#interno").mount(Static("Options", id="options"))
+            self.query_one(Vertical).mount(Horizontal(
+                    Static("Options", id="options"),
+                    classes="homepage-horizontal-options"
+                )
+            )
             for k, v in options.items():
                 if v[0] == "BOOLEAN":
-                    self.query_one("#interno").mount(Horizontal(
-                        Static(f"[bold]{v[1]}"),
+                    self.query_one(Vertical).mount(Horizontal(
                         Checkbox(id=f"--{k}"),
-                        classes="commands-horizontal"
+                        Static(f"[bold]{v[1]}"),
+                        classes="homepage-horizontal-bool"
                     ))
                 else:
                     if k == "password":
-                        self.query_one("#interno").mount(Horizontal(
+                        self.query_one(Vertical).mount(Horizontal(
                             Input(placeholder=f"{k}....", password=True, id=f"--{k}"),
                             Static(f"[bold]{v[1]}"),
-                            classes="commands-horizontal"
+                            classes="homepage-horizontal"
                         ))
                     else:
-                        self.query_one("#interno").mount(Horizontal(
+                        self.query_one(Vertical).mount(Horizontal(
                             Input(placeholder=f"{k}....", id=f"--{k}"),
                             Static(f"[bold]{v[1]}"),
-                            classes="commands-horizontal"
+                            classes="homepage-horizontal"
                         ))
 
         if commands:
-            self.query_one("#interno").mount(Static("Commands", id="commands"))
-            if options:
-                self.query_one("#commands").styles.margin = (5, 0, 0, 1)
+            self.query_one(Vertical).mount(Horizontal(
+                Static("Commands", id="commands"),
+                classes="homepage-horizontal-commands"
+                )
+            )
             for command in commands:
-                self.query_one("#interno").mount(Horizontal(
+                self.query_one(Vertical).mount(Horizontal(
                     Button(f"{command[0]}", id=f"{command[0]}"),
-                    Static(f"[bold][#E1C699]{command[1]}"),
-                    classes="commands-horizontal"
+                    Static(f"[bold][#E1C699]{command[1]}", classes="homepage-static-buttons"),
+                    classes="homepage-horizontal"
                 ))

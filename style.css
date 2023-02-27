@@ -28,15 +28,6 @@ Screen {
     max-height: 100%;
 }
 
-#options {
-    content-align: center middle;
-    min-height: 1;
-    width: 50%;
-    text-style: bold;
-    background: $panel;
-    border: hkey red;
-    margin-bottom: 1;
-}
 
 #interno {
     layout: vertical;
@@ -69,17 +60,6 @@ Screen {
     height: auto;
 }
 
-#commands{
-    content-align: center middle;
-    min-height: 1;
-    width: 50%;
-    text-style: bold;
-    background: $panel;
-    border: hkey seagreen;
-    margin-bottom: 1;
-    margin-top: 1;
-}
-
 .commands-horizontal{
     margin-top: 1;
     height: auto;
@@ -91,7 +71,7 @@ Screen {
 #homepage > #interno > .commands-horizontal > Static{
     width: auto;
     height: auto;
-    border: blank;
+    border: red;
 }
 
 #homepage > #interno> .commands-horizontal > Input{
@@ -109,6 +89,112 @@ Screen {
 #homepage > #interno > .commands-horizontal > Button:hover {
     background: #2d4156;
 }
+
+#homepage-vertical {
+    width: 100%;
+    height: auto;
+    align: center middle;
+}
+
+.homepage-horizontal {
+    border: #1d2e38;
+    width: 60%;
+    height: auto;
+    align: center middle;
+}
+
+.homepage-horizontal-options {
+    border: blank;
+    width: 60%;
+    height: auto;
+    align: center middle;
+}
+
+.homepage-horizontal-commands{
+    border: blank;
+    width: 60%;
+    height: auto;
+    align: center middle;
+}
+
+.homepage-horizontal > .homepage-static-buttons{
+    height: auto;
+    content-align: center middle;
+    border: blank;
+    width: 70%;
+}
+
+.homepage-horizontal > Button{
+    border: tall #1d2e38;
+    width: auto;
+    background: $primary-background-darken-2;
+    margin-right: 2;
+}
+
+.homepage-horizontal > Button:hover {
+    background: #2d4156;
+}
+
+.homepage-horizontal-bool{
+    border: #1d2e38;
+    width: 60%;
+    height: auto;
+    align: center middle;
+}
+
+.homepage-horizontal-bool > Static{
+    content-align: center middle;
+    width: 75%;
+    border: blank;
+}
+
+.homepage-horizontal-bool > Checkbox{
+    content-align: center middle;
+    width: auto;
+}
+
+#options {
+    content-align: center middle;
+    min-height: 1;
+    text-style: bold;
+    background: $panel;
+    border: hkey red;
+}
+
+#commands{
+    margin-top: 1;
+    content-align: center middle;
+    min-height: 1;
+    text-style: bold;
+    background: $panel;
+    border: hkey seagreen;
+}
+
+.homepage-horizontal > Static{
+    content-align: center middle;
+    width: 100%;
+}
+
+.homepage-horizontal > Input{
+    width: 20%;
+    dock: left;
+}
+
+.homepage-horizontal > Checkbox{
+    width: auto;
+}
+
+.homepage-horizontal > Button {
+    border: tall #1d2e38;
+    width: auto;
+    background: $primary-background-darken-2;
+    margin-right: 2;
+}
+
+.homepage-horizontal > Button:hover {
+    background: #2d4156;
+}
+
 
 /* BOOKLET */
 
@@ -145,6 +231,10 @@ Screen {
 
 .booklet-horizontal > Checkbox {
     height: auto;
+    width: auto;
+}
+
+.booklet-horizontal > Input {
     width: auto;
 }
 

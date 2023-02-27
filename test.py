@@ -12,10 +12,77 @@ def main_output() -> List[str]:
 
 
     result = subprocess.run(
-        ["esse3-student", "booklet", "--help"],
+        ["esse3-student", "--help"],
         capture_output=True,
     )
-    return result.stdout.decode().split('\n')
+
+    output = result.stdout.decode().split('\n')
+    start_options = False
+    start_commands = False
+    options = {}
+    commands = []
+    for index, line in enumerate(output, start=1):
+        if "Options" in line:
+            start_options = True
+            continue
+        if "Commands" in line:
+            start_options = False
+            start_commands = True
+            continue
+        if start_options:
+            items = line.split(" ")
+            words = []
+            current_word = ""
+            for option in items:
+                if option and option != '│' and option != '*':
+                    current_word += " " + option
+
+                else:
+                    words.append(current_word.strip())
+                    current_word = ""
+
+            words = list(filter(bool, words))
+
+            if words:
+
+                if ',' in words[0]:
+                    words[0] = words[0].split(",")[0]
+
+                if len(words) > 1:
+                    if words[1].startswith("-"):
+                        words.remove(words[1])
+                words[0] = words[0].replace('--', '')
+                if len(words) == 1:
+                    words.append("BOOLEAN")
+                if len(words) == 2:
+                    types = ["INTEGER", "FLOAT", "TEXT", "[", "<", "UUID", "PATH", "FILENAME", "BOOLEAN"]
+                    if not any(words[1].replace('[', '(').replace('<', '(').startswith(t) for t in types):
+                        words.insert(1, "BOOLEAN")
+                if len(words) == 2:
+                    words.append("No description")
+                words[2] = words[2].replace('[', '(').replace(']', ')')
+                if words[0] == "help":
+                    continue
+                options[words[0]] = words[1:]
+
+        elif start_commands and any(word.isalpha() for word in line.split()):
+            command = line.split(" ")
+            words = []
+            current_word = ""
+            for item in command:
+                if item and item != '│':
+                    current_word += " " + item
+                else:
+                    words.append(current_word.strip())
+                    current_word = ""
+            words = list(filter(bool, words))
+            commands.append(words)
+
+    for k, v in options.items():
+        print(f"{k}:  {', '.join(str(x) for x in v)}")
+
+    for c in commands:
+        print(c)
 
 
 def process_commands():
@@ -165,8 +232,5 @@ if __name__ == "__main__":
     print(grade_to_obtain)"""
 
     output = main_output()
-    options = options(output)
 
-    for o in options:
-        print(o)
 
