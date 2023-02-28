@@ -25,10 +25,13 @@ def homepage_output() -> Tuple[List[str], str]:
 
     application = sys.argv[1]
 
-    result = subprocess.run(
-        [application, "--help"],
-        capture_output=True,
-    )
+    result = subprocess.run(["xdotool", "getactivewindow"], capture_output=True)
+    window_id = result.stdout.decode().strip()
+
+    # ingrandisci la finestra corrente
+    subprocess.run(["xdotool", "windowsize", window_id, "70%", "70%"])
+
+    result = subprocess.run([application, "--help"], capture_output=True)
 
     return result.stdout.decode().split('\n'), application
 
@@ -62,10 +65,13 @@ class Tui(App):
 
     def call_button(self, command: str) -> List[str]:
 
-        result = subprocess.run(
-            [self.application, command, "--help"],
-            capture_output=True,
-        )
+        result = subprocess.run(["xdotool", "getactivewindow"], capture_output=True)
+        window_id = result.stdout.decode().strip()
+
+        # ingrandisci la finestra corrente
+        subprocess.run(["xdotool", "windowsize", window_id, "70%", "70%"])
+
+        result = subprocess.run([self.application, command, "--help"], capture_output=True)
 
         return result.stdout.decode().split('\n')
 

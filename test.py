@@ -8,35 +8,27 @@ from rich.console import Console
 from tui import Tui
 
 
-def main_output() -> List[str]:
-
+def main_output():
 
     result = subprocess.run(
-        ["esse3-student", "--help"],
+        ["esse3-student", "booklet", "--help"],
         capture_output=True,
     )
 
     output = result.stdout.decode().split('\n')
-    start_options = False
-    start_commands = False
+    start = False
     options = {}
-    commands = []
     for index, line in enumerate(output, start=1):
         if "Options" in line:
-            start_options = True
+            start = True
             continue
-        if "Commands" in line:
-            start_options = False
-            start_commands = True
-            continue
-        if start_options:
+        if start:
             items = line.split(" ")
             words = []
             current_word = ""
             for option in items:
                 if option and option != '│' and option != '*':
                     current_word += " " + option
-
                 else:
                     words.append(current_word.strip())
                     current_word = ""
@@ -47,42 +39,33 @@ def main_output() -> List[str]:
 
                 if ',' in words[0]:
                     words[0] = words[0].split(",")[0]
+                words[0] = words[0].replace('--', '')
+
+                if words[0] == "help":
+                    continue
 
                 if len(words) > 1:
                     if words[1].startswith("-"):
                         words.remove(words[1])
-                words[0] = words[0].replace('--', '')
+
                 if len(words) == 1:
                     words.append("BOOLEAN")
+
                 if len(words) == 2:
                     types = ["INTEGER", "FLOAT", "TEXT", "[", "<", "UUID", "PATH", "FILENAME", "BOOLEAN"]
                     if not any(words[1].replace('[', '(').replace('<', '(').startswith(t) for t in types):
                         words.insert(1, "BOOLEAN")
+
                 if len(words) == 2:
                     words.append("No description")
-                words[2] = words[2].replace('[', '(').replace(']', ')')
-                if words[0] == "help":
-                    continue
-                options[words[0]] = words[1:]
 
-        elif start_commands and any(word.isalpha() for word in line.split()):
-            command = line.split(" ")
-            words = []
-            current_word = ""
-            for item in command:
-                if item and item != '│':
-                    current_word += " " + item
-                else:
-                    words.append(current_word.strip())
-                    current_word = ""
-            words = list(filter(bool, words))
-            commands.append(words)
+                for i in range(2, len(words)):
+                    words[i] = words[i].replace('[', '(').replace(']', ')')
+
+                options[words[0]] = words[1:]
 
     for k, v in options.items():
         print(f"{k}:  {', '.join(str(x) for x in v)}")
-
-    for c in commands:
-        print(c)
 
 
 def process_commands():
@@ -216,6 +199,58 @@ def options(output):
             options.append(words)
 
     return options
+
+
+def booklet_options(output):
+    start = False
+    options = {}
+    for index, line in enumerate(output, start=1):
+        if "Options" in line:
+            start = True
+            continue
+        if start:
+            items = line.split(" ")
+            words = []
+            current_word = ""
+            for option in items:
+                if option and option != '│' and option != '*':
+                    current_word += " " + option
+                else:
+                    words.append(current_word.strip())
+                    current_word = ""
+
+            words = list(filter(bool, words))
+
+            if words:
+
+                if ',' in words[0]:
+                    words[0] = words[0].split(",")[0]
+                words[0] = words[0].replace('--', '')
+
+                if words[0] == "help":
+                    continue
+
+                if len(words) > 1:
+                    if words[1].startswith("-"):
+                        words.remove(words[1])
+
+                if len(words) == 1:
+                    words.append("BOOLEAN")
+
+                if len(words) == 2:
+                    types = ["INTEGER", "FLOAT", "TEXT", "[", "<", "UUID", "PATH", "FILENAME", "BOOLEAN"]
+                    if not any(words[1].replace('[', '(').replace('<', '(').startswith(t) for t in types):
+                        words.insert(1, "BOOLEAN")
+
+                if len(words) == 2:
+                    words.append("No description")
+
+                words[2] = words[2].replace('[', '(').replace(']', ')')
+
+                options[words[0]] = words[1:]
+
+    for k, v in options.items():
+        print(f"{k}: {v[0]}, {v[1]}")
 
 
 if __name__ == "__main__":

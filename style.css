@@ -23,72 +23,6 @@ Screen {
 }
 
 /* HOMEPAGE */
-#homepage{
-    width: 100%;
-    max-height: 100%;
-}
-
-
-#interno {
-    layout: vertical;
-    align: center top;
-    overflow: auto auto;
-    border: outer #1d2e38;
-}
-
-.credentials {
-    width: 49%;
-}
-
-#debug {
-    margin-top: 1;
-    width: 50%;
-    height: auto;
-    align: center middle;
-}
-
-#debug > Static {
-    width: auto;
-    height: auto;
-    margin-right: 2;
-    text-style: bold;
-    border: blank;
-}
-
-#debug > Checkbox{
-    width: auto;
-    height: auto;
-}
-
-.commands-horizontal{
-    margin-top: 1;
-    height: auto;
-    align: center middle;
-    width: auto;
-    margin-bottom: 1;
-}
-
-#homepage > #interno > .commands-horizontal > Static{
-    width: auto;
-    height: auto;
-    border: red;
-}
-
-#homepage > #interno> .commands-horizontal > Input{
-    width: 20%;
-    height: auto;
-}
-
-#homepage > #interno > .commands-horizontal > Button {
-    border: tall #1d2e38;
-    width: auto;
-    background: $primary-background-darken-2;
-    margin-right: 2;
-}
-
-#homepage > #interno > .commands-horizontal > Button:hover {
-    background: #2d4156;
-}
 
 #homepage-vertical {
     width: 100%;
@@ -139,12 +73,18 @@ Screen {
     border: #1d2e38;
     width: 60%;
     height: auto;
-    align: center middle;
+
+}
+
+.homepage-horizontal-bool > .checkbox-name{
+    content-align: center middle;
+    width: auto;
+    border: blank;
 }
 
 .homepage-horizontal-bool > Static{
     content-align: center middle;
-    width: 75%;
+    width: 80%;
     border: blank;
 }
 
@@ -153,7 +93,7 @@ Screen {
     width: auto;
 }
 
-#options {
+.options {
     content-align: center middle;
     min-height: 1;
     text-style: bold;
@@ -201,18 +141,41 @@ Screen {
 #booklet-vertical {
     width: 100%;
     height: auto;
+    align: center middle;
 }
 
 .booklet-horizontal {
-    border: outer #1d2e38;
-    width: 100%;
+    border: #1d2e38;
+    width: 80%;
+    height: auto;
+}
+
+.booklet-horizontal-bool {
+    border: #1d2e38;
+    width: 80%;
+    height: auto;
+}
+
+
+.command-horizontal-options {
+    border: blank;
+    width: 80%;
     height: auto;
     align: center middle;
+}
+
+.command-options {
     margin-top: 1;
+    margin-bottom: 1;
+    content-align: center middle;
+    min-height: 1;
+    text-style: bold;
+    background: $panel;
+    border: hkey red;
 }
 
 .booklet-horizontal-button {
-    width: 100%;
+    width: 80%;
     height: auto;
     align: center middle;
     margin-top: 1;
@@ -240,17 +203,32 @@ Screen {
 
 .booklet-horizontal > .description {
     border: blank;
-    width: 50%;
+    width: 67%;
 }
 
 .booklet-horizontal > .types {
     border: blank;
-    width: 10%;
+    width: 13%;
 }
 
 .booklet-horizontal > .name {
     border: blank;
     width: 15%;
+}
+
+.booklet-horizontal-bool  > .description {
+    border: blank;
+    width: 60%;
+}
+
+.booklet-horizontal-bool > .types {
+    border: blank;
+    width: 11%;
+}
+
+.booklet-horizontal-bool > .name {
+    border: blank;
+    width: 12%;
 }
 
 .booklet-horizontal > .blank {

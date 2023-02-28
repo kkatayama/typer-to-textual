@@ -58,40 +58,52 @@ class CommandOptions(Screen):
 
     def options(self):
         start = False
-        options = []
+        options = {}
         for index, line in enumerate(self.output, start=1):
             if "Options" in line:
                 start = True
                 continue
-            if start and any(word.isalpha() for word in line.split()):
-                command = line.split(" ")
+            if start:
+                items = line.split(" ")
                 words = []
                 current_word = ""
-                for item in command:
-                    if item and item != '│':
-                        current_word += " " + item
+                for option in items:
+                    if option and option != '│' and option != '*':
+                        current_word += " " + option
                     else:
                         words.append(current_word.strip())
                         current_word = ""
 
                 words = list(filter(bool, words))
-                if len(words) == 2:
-                    words.insert(1, "BOOLEAN")
-
-                types = ["INTEGER", "BOOLEAN", "TEXT"]
-                if len(words) == 3 and words[1] not in types:
-                    words[1] = "BOOLEAN"
-
-                if len(words) == 4 and words[1] not in types:
-                    words[1] = words[2]
 
                 if words:
+
+                    if ',' in words[0]:
+                        words[0] = words[0].split(",")[0]
                     words[0] = words[0].replace('--', '')
-                    words[2] = words[2].replace('[', '(')
-                    words[2] = words[2].replace(']', ')')
+
                     if words[0] == "help":
                         continue
-                options.append(words)
+
+                    if len(words) > 1:
+                        if words[1].startswith("-"):
+                            words.remove(words[1])
+
+                    if len(words) == 1:
+                        words.append("BOOLEAN")
+
+                    if len(words) == 2:
+                        types = ["INTEGER", "FLOAT", "TEXT", "[", "<", "UUID", "PATH", "FILENAME", "BOOLEAN"]
+                        if not any(words[1].replace('[', '(').replace('<', '(').startswith(t) for t in types):
+                            words.insert(1, "BOOLEAN")
+
+                    if len(words) == 2:
+                        words.append("No description")
+
+                    for i in range(2, len(words)):
+                        words[i] = words[i].replace('[', '(').replace(']', ')')
+
+                    options[words[0]] = words[1:]
 
         return options
 
@@ -116,26 +128,32 @@ class CommandOptions(Screen):
                 )
 
         if len(options) != 0:
-            self.query_one(Vertical).mount(Static("Options", id="options2"))
-            for option in options:
 
-                if option[1] != "BOOLEAN":
+            self.query_one(Vertical).mount(Horizontal(
+                Static("Options", classes="command-options"),
+                classes="command-horizontal-options"
+                )
+            )
+
+            for k, v in options.items():
+
+                if v[0] != "BOOLEAN":
                     self.query_one(Vertical).mount(Horizontal(
-                        Static(f"[b][cyan]{option[0]}[/][/]", classes="name"),
-                        Static(f"[b][red]{option[1]}[/]", classes="types"),
-                        Static(f"[b]{' '.join(option[2:])}[/]", classes="description"),
-                        Input(placeholder=f"{option[0]}....", classes="input", id=f"--{option[0]}"),
+                        Static(f"[b][cyan]{k}[/][/]", classes="name"),
+                        Static(f"[b][red]{v[0]}[/]", classes="types"),
+                        Static(f"[b]{' '.join(v[1:])}[/]", classes="description"),
+                        Input(placeholder=f"{k}....", classes="input", id=f"--{k}"),
                         classes="booklet-horizontal"
                         )
                     )
 
                 else:
                     self.query_one(Vertical).mount(Horizontal(
-                        Static(f"[b][cyan]{option[0]}[/][/]", classes="name"),
-                        Static(f"[b][red]{option[1]}[/]", classes="types"),
-                        Static(f"[b]{' '.join(option[2:])}[/]", classes="description"),
-                        Checkbox(id=f"--{option[0]}"),
-                        classes="booklet-horizontal"
+                        Static(f"[b][cyan]{k}[/][/]", classes="name"),
+                        Static(f"[b][red]{v[0]}[/]", classes="types"),
+                        Static(f"[b]{' '.join(v[1:])}[/]", classes="description"),
+                        Checkbox(id=f"--{k}"),
+                        classes="booklet-horizontal-bool"
                         )
                     )
 

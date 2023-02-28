@@ -33,6 +33,7 @@ class HomePage(Screen):
         options = {}
         commands = []
         for index, line in enumerate(self.output, start=1):
+
             if "Options" in line:
                 start_options = True
                 continue
@@ -57,22 +58,29 @@ class HomePage(Screen):
 
                     if ',' in words[0]:
                         words[0] = words[0].split(",")[0]
+                    words[0] = words[0].replace('--', '')
+
+                    if words[0] == "help":
+                        continue
 
                     if len(words) > 1:
                         if words[1].startswith("-"):
                             words.remove(words[1])
-                    words[0] = words[0].replace('--', '')
+
                     if len(words) == 1:
                         words.append("BOOLEAN")
+
                     if len(words) == 2:
                         types = ["INTEGER", "FLOAT", "TEXT", "[", "<", "UUID", "PATH", "FILENAME", "BOOLEAN"]
                         if not any(words[1].replace('[', '(').replace('<', '(').startswith(t) for t in types):
                             words.insert(1, "BOOLEAN")
+
                     if len(words) == 2:
                         words.append("No description")
-                    words[2] = words[2].replace('[', '(').replace(']', ')')
-                    if words[0] == "help":
-                        continue
+
+                    for i in range(2, len(words)):
+                        words[i] = words[i].replace('[', '(').replace(']', ')')
+
                     options[words[0]] = words[1:]
 
             elif start_commands and any(word.isalpha() for word in line.split()):
@@ -92,7 +100,6 @@ class HomePage(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header("Homepage", classes="header")
-
         yield Footer()
 
     def on_mount(self) -> None:
@@ -105,13 +112,14 @@ class HomePage(Screen):
 
         if options:
             self.query_one(Vertical).mount(Horizontal(
-                    Static("Options", id="options"),
+                    Static("Options", classes="options"),
                     classes="homepage-horizontal-options"
                 )
             )
             for k, v in options.items():
                 if v[0] == "BOOLEAN":
                     self.query_one(Vertical).mount(Horizontal(
+                        Static(f"[bold]{k}:", classes="checkbox-name"),
                         Checkbox(id=f"--{k}"),
                         Static(f"[bold]{v[1]}"),
                         classes="homepage-horizontal-bool"
