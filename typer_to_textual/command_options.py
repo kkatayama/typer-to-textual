@@ -116,14 +116,20 @@ class CommandOptions(Screen):
             self.mount(Vertical(id="booklet-vertical"))
 
         if len(arguments) != 0:
-            self.query_one(Vertical).mount(Static("Arguments", id="arguments"))
+
+            self.query_one(Vertical).mount(Horizontal(
+                Static("Arguments", classes="command-arguments"),
+                classes="command-horizontal-options"
+                )
+            )
+
             for k, v in arguments.items():
-                arg_str = f"[b][red]{v[0]}[/] {' '.join(v[1:])}[/]"
+                arg_str = f"[b][green]{v[0]}   [/] {' '.join(v[1:])}[/]"
                 self.query_one(Vertical).mount(Horizontal(
                     Static(f"[b][cyan]{k}[/][/]", classes="name"),
                     Static(arg_str, classes="description"),
                     Input(placeholder=f"{k}....", classes="input"),
-                    classes="booklet-horizontal"
+                    classes="booklet-horizontal-arguments"
                     )
                 )
 

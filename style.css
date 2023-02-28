@@ -164,6 +164,12 @@ Screen {
     align: center middle;
 }
 
+.booklet-horizontal-arguments {
+    border: #1d2e38;
+    width: 80%;
+    height: auto;
+}
+
 .command-options {
     margin-top: 1;
     margin-bottom: 1;
@@ -174,11 +180,22 @@ Screen {
     border: hkey red;
 }
 
+.command-arguments {
+    margin-top: 1;
+    margin-bottom: 1;
+    content-align: center middle;
+    min-height: 1;
+    text-style: bold;
+    background: $panel;
+    border: hkey green;
+}
+
 .booklet-horizontal-button {
     width: 80%;
     height: auto;
     align: center middle;
     margin-top: 1;
+    margin-bottom: 1;
 }
 
 .booklet-horizontal-button > Button {
@@ -197,9 +214,21 @@ Screen {
     width: auto;
 }
 
-.booklet-horizontal > Input {
-    width: auto;
+.booklet-horizontal-arguments > .name{
+    border: blank;
+    width: 15%;
 }
+
+.booklet-horizontal-arguments > .description{
+    border: blank;
+    width: 80%;
+}
+
+.booklet-horizontal-arguments > .input{
+    width: 15%;
+    dock: right;
+}
+
 
 .booklet-horizontal > .description {
     border: blank;
