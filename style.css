@@ -139,23 +139,11 @@ Screen {
 /* BOOKLET */
 
 #booklet-vertical {
-    width: 100%;
+    layout: vertical;
+    overflow: auto auto;
     height: auto;
     align: center middle;
 }
-
-.booklet-horizontal {
-    border: #1d2e38;
-    width: 80%;
-    height: auto;
-}
-
-.booklet-horizontal-bool {
-    border: #1d2e38;
-    width: 80%;
-    height: auto;
-}
-
 
 .command-horizontal-options {
     border: blank;
@@ -209,11 +197,6 @@ Screen {
     background: #2d4156;
 }
 
-.booklet-horizontal > Checkbox {
-    height: auto;
-    width: auto;
-}
-
 .booklet-horizontal-arguments > .name{
     border: blank;
     width: 15%;
@@ -229,68 +212,131 @@ Screen {
     dock: right;
 }
 
+.booklet-horizontal-test {
+    layout: horizontal;
+    border: #1d2e38;
+    width: 80%;
+    height: auto;
+}
+
+.booklet-horizontal-test > .description {
+    border: blank;
+    width: 57%;
+}
+
+.booklet-horizontal-test > .types {
+    border: blank;
+    width: 15;
+}
+
+.booklet-horizontal-test > .name {
+    border: blank;
+    width: 15;
+}
+
+.booklet-horizontal-test > .input {
+    width: 5%;
+}
+
+.booklet-horizontal {
+    layout: horizontal;
+    border: #1d2e38;
+    width: 80%;
+    height: auto;
+}
+
+.booklet-horizontal > Checkbox {
+    height: auto;
+    width: auto;
+}
 
 .booklet-horizontal > .description {
     border: blank;
-    width: 67%;
+    width: 40%;
 }
 
 .booklet-horizontal > .types {
     border: blank;
-    width: 13%;
+    width: 10;
 }
 
 .booklet-horizontal > .name {
     border: blank;
-    width: 15%;
-}
-
-.booklet-horizontal-bool  > .description {
-    border: blank;
-    width: 60%;
-}
-
-.booklet-horizontal-bool > .types {
-    border: blank;
-    width: 11%;
-}
-
-.booklet-horizontal-bool > .name {
-    border: blank;
-    width: 12%;
-}
-
-.booklet-horizontal > .blank {
-    width: 15%;
-    dock: right;
-    background: $panel;
+    width: 15;
 }
 
 .booklet-horizontal > .input {
     width: 15%;
-    dock: right;
+}
+
+.booklet-horizontal > .buttons {
+    margin-left: 6;
+    margin-right: 1;
+    min-width: 5;
+    background: $primary-background-darken-2;
+}
+
+.booklet-horizontal > .buttons:hover {
+    background: #2d4156;
 }
 
 .booklet-horizontal > Checkbox:hover {
     background: #2d4156;
 }
 
-.booklet-horizontal > Button {
+.booklet-horizontal > .run {
     border: tall #1d2e38;
     width: auto;
     background: $primary-background-darken-2;
     margin-right: 2;
 }
 
-.booklet-horizontal > Button:hover {
+.booklet-horizontal > .run {
     background: #2d4156;
 }
+
+.booklet-horizontal-bool {
+    border: #1d2e38;
+    width: 80%;
+    height: auto;
+}
+
+.booklet-horizontal-bool  > .description {
+    border: blank;
+    width: 57%;
+}
+
+.booklet-horizontal-bool > .types {
+    border: blank;
+    width: 15;
+}
+
+.booklet-horizontal-bool > .name {
+    border: blank;
+    width: 15;
+}
+
 
 .empty {
     align: center middle;
     height: 1fr;
     width: 100%;
     border: #ec971f;
+}
+
+.run{
+    border: tall #1d2e38;
+    width: auto;
+    background: $primary-background-darken-2;
+}
+
+.run:hover{
+    background: #2d4156;
+}
+
+.empty > Horizontal > #description{
+    border: blank;
+    width: auto;
 }
 
 .empty >Horizontal{
@@ -303,17 +349,6 @@ Screen {
 .empty > Horizontal > Static{
     content-align: center middle;
     width: auto;
-}
-
-.empty > Horizontal > Button {
-    border: tall #1d2e38;
-    width: auto;
-    background: $primary-background-darken-2;
-    margin-right: 2;
-}
-
-.empty > Horizontal > Button:hover {
-    background: #2d4156;
 }
 
 #arguments {

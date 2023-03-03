@@ -266,6 +266,35 @@ if __name__ == "__main__":
     print(second)
     print(grade_to_obtain)"""
 
-    output = main_output()
+    result = subprocess.run(
+        ["esse3-student", "--help"],
+        capture_output=True,
+    )
+
+    output = result.stdout.decode().split('\n')
+
+    start_commands = False
+    buttons = []
+    for index, line in enumerate(output, start=1):
+
+        if "Commands" in line:
+            start_commands = True
+            continue
+
+        if start_commands and any(word.isalpha() for word in line.split()):
+            command = line.split(" ")
+            words = []
+            current_word = ""
+            for item in command:
+                if item and item != '│':
+                    current_word += " " + item
+                else:
+                    words.append(current_word.strip())
+                    current_word = ""
+
+            words = list(filter(bool, words))
+            buttons.append(words[1])
+
+    print(buttons)
 
 

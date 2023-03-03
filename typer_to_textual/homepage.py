@@ -94,6 +94,11 @@ class HomePage(Screen):
                         words.append(current_word.strip())
                         current_word = ""
                 words = list(filter(bool, words))
+
+                if words:
+                    if len(words) == 1:
+                        words.append("No description")
+
                 commands.append(words)
 
         return options, commands
@@ -120,20 +125,20 @@ class HomePage(Screen):
                 if v[0] == "BOOLEAN":
                     self.query_one(Vertical).mount(Horizontal(
                         Static(f"[bold]{k}:", classes="checkbox-name"),
-                        Checkbox(id=f"--{k}"),
+                        Checkbox(id=f"--{k}", name="checkbox"),
                         Static(f"[bold]{v[1]}"),
                         classes="homepage-horizontal-bool"
                     ))
                 else:
                     if k == "password":
                         self.query_one(Vertical).mount(Horizontal(
-                            Input(placeholder=f"{k}....", password=True, id=f"--{k}"),
+                            Input(placeholder=f"{k}....", password=True, id=f"--{k}", name="input"),
                             Static(f"[bold]{v[1]}"),
                             classes="homepage-horizontal"
                         ))
                     else:
                         self.query_one(Vertical).mount(Horizontal(
-                            Input(placeholder=f"{k}....", id=f"--{k}"),
+                            Input(placeholder=f"{k}....", id=f"--{k}", name="input"),
                             Static(f"[bold]{v[1]}"),
                             classes="homepage-horizontal"
                         ))

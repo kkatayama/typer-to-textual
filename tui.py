@@ -3,7 +3,8 @@ import subprocess
 
 from textual.app import App
 from textual.binding import Binding
-from textual.widgets import Button
+from textual.containers import Horizontal
+from textual.widgets import Button, Static, Input
 from textual import events
 from textual.pilot import Pilot
 
@@ -55,9 +56,11 @@ class Tui(App):
     async def on_key(self, event: events.Key):
         if event.key == "up":
             pilot = Pilot(self)
+            #await pilot.press("enter")
             await pilot.press("shift+tab")
         if event.key == "down":
             pilot = Pilot(self)
+            #await pilot.press("enter")
             await pilot.press("tab")
 
     def action_key_escape(self) -> None:
@@ -75,9 +78,9 @@ class Tui(App):
 
         return result.stdout.decode().split('\n')
 
-    def buttons(self) -> List[str]:
+    def buttons(self):
         start_commands = False
-        buttons = []
+        buttons = {}
         for index, line in enumerate(self.output, start=1):
 
             if "Commands" in line:
@@ -96,48 +99,135 @@ class Tui(App):
                         current_word = ""
 
                 words = list(filter(bool, words))
-                buttons.append(words[0])
+                buttons[words[0]] = words[1]
 
         return buttons
 
     def on_button_pressed(self, event: Button.Pressed):
 
-        buttons = self.buttons()
+        values = self.buttons()
+        buttons = values.keys()
 
         if event.button.id in buttons:
 
+            description = values[event.button.id]
             if not self.is_screen_installed(event.button.id):
                 result = self.call_button(event.button.id)
-                self.install_screen(CommandOptions(result, event.button.id), name=event.button.id)
+                self.install_screen(CommandOptions(result, event.button.id, description), name=event.button.id)
             self.push_screen(event.button.id)
 
         elif event.button.id.startswith("show-"):
 
             homepage_data = {}
 
-            for element in self.query_one(HomePage).query("Checkbox"):
-                if str(element.value) == "True":
-                    homepage_data[element.id] = "BOOL"
-
-            for element in self.query_one(HomePage).query("Input"):
-                if element.value != '':
-                    homepage_data[element.id] = element.value
+            for element in self.query_one(HomePage).query():
+                if element.name == "checkbox":
+                    if str(element.value) == "True":
+                        homepage_data[element.id] = "BOOL"
+                elif element.name == "input":
+                    if element.value != '':
+                        homepage_data[element.id] = element.value
 
             command_data = {}
+            lista = []
+            almeno_uno = False
 
-            for element in self.query(CommandOptions).last().query("Checkbox"):
-                if str(element.value) == "True":
-                    command_data[element.id] = "BOOL"
+            for element in self.query(CommandOptions).last().query(".booklet-horizontal"):
+                key = element.query_one(".name").id
+                type = ''
+                tupla = []
+                for index, i in enumerate(element.query("Static"), start=1):
+                    if index == 2 and i.name != "BOOLEAN":
+                        tupla = i.name.split(" ")
+                        if len(tupla) == 1:
+                            if tupla[0] == "TEXT":
+                                type = "TEXT"
+                            elif tupla[0] == "INTEGER":
+                                type = "INTEGER"
+                            else:
+                                type = "FLOAT"
+                        else:
+                            type = "TUPLE"
 
-            for element in self.query(CommandOptions).last().query("Input"):
-                if element.value != '':
-                    command_data[element.id] = element.value
+                if type == "INTEGER":
+                    for i in element.query(".input"):
+                        if i.value != '':
+                            try:
+                                converted_value = int(i.value)
+                                if isinstance(converted_value, int):
+                                    i.styles.border = ("blank", "red")
+                            except ValueError:
+                                almeno_uno = True
+                                i.styles.border = ("tall", "red")
+
+                elif type == "FLOAT":
+                    for i in element.query(".input"):
+                        if i.value != '':
+                            try:
+                                converted_value = float(i.value)
+                                if isinstance(converted_value, float):
+                                    i.styles.border = ("blank", "red")
+                            except ValueError:
+                                almeno_uno = True
+                                i.styles.border = ("tall", "red")
+
+                elif type == "TUPLE":
+                    for index, i in enumerate(element.query(".input"), start=0):
+                        if i.value != '':
+                            tipo = tupla[index]
+                            if tipo == "INTEGER":
+                                tipo = 'int'
+                            if tipo == "TEXT":
+                                tipo = 'str'
+                            if tipo == "FLOAT":
+                                tipo = 'float'
+                            try:
+                                converted_value = eval(tipo)(i.value)
+                                if isinstance(converted_value, eval(tipo)):
+                                    i.styles.border = ("blank", "red")
+                            except ValueError:
+                                almeno_uno = True
+                                i.styles.border = ("tall", "red")
+
+                if len(element.query(".input")) > 0:
+                    tmp = ''
+                    diversi = False
+                    for index, i in enumerate(element.query(".input"), start=1):
+                        if index == 1:
+                            tmp = i.placeholder
+                        if index == 2:
+                            if i.placeholder != tmp:
+                                diversi = True
+                    if diversi:
+                        if len(element.query(".input")) > 0:
+                            for index, i in enumerate(element.query(".input"), start=1):
+                                if i.value != '':
+                                    if index == 1:
+                                        command_data[key] = [i.value]
+                                    else:
+                                        command_data[key].append(i.value)
+                    elif not diversi:
+                        for index, i in enumerate(element.query(".input"), start=1):
+                            if i.value != '':
+                                lista.append(key)
+                                lista.append(i.value)
+                else:
+                    if str(element.query_one("Checkbox").value) == "True":
+                        command_data[key] = "BOOL"
 
             command = event.button.id.replace("show-", "")
 
+            if almeno_uno:
+                return
+
             if not self.is_screen_installed(event.button.id):
-                self.install_screen(Show(self.application, command, homepage_data, command_data), name=event.button.id)
+                self.install_screen(Show(self.application, command, homepage_data, command_data, lista), name=event.button.id)
             self.push_screen(event.button.id)
+
+        if event.button.id.startswith("one_more-"):
+            index = event.button.id.split("-")[1]
+            placeholder = self.query(CommandOptions).last().query_one(f"#container-{index}").query_one(".name").id.replace("--", "")
+            self.query(CommandOptions).last().query_one(f"#container-{index}").mount(Input(placeholder=f"{placeholder}....", classes="input"), before=3)
 
     def action_pop_screen(self):
         self.uninstall_screen(self.pop_screen())
