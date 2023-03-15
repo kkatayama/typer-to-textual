@@ -71,7 +71,7 @@ class HomePage(Screen):
                         words.append("BOOLEAN")
 
                     if len(words) == 2:
-                        types = ["INTEGER", "FLOAT", "TEXT", "[", "<", "UUID", "PATH", "FILENAME", "BOOLEAN"]
+                        types = ["INTEGER", "FLOAT", "TEXT", "<", "UUID", "PATH", "FILENAME", "BOOLEAN"]
                         if not any(words[1].replace('[', '(').replace('<', '(').startswith(t) for t in types):
                             words.insert(1, "BOOLEAN")
 

@@ -10,6 +10,7 @@ packages = [{include = "generic_typer"}]
 python = "^3.9"
 textual = "^0.10.1"
 typer = "^0.7.0"
+rich = "^13.3.2"
 
 
 [build-system]

@@ -94,7 +94,7 @@ class CommandOptions(Screen):
                         words.append("BOOLEAN")
 
                     if len(words) == 2:
-                        types = ["INTEGER", "FLOAT", "TEXT", "<", "UUID", "PATH", "FILENAME", "BOOLEAN"]
+                        types = ["INTEGER", "FLOAT", "TEXT", "TUPLE", "UUID", "PATH", "FILENAME", "BOOLEAN"]
                         if not any(words[1].replace('[', '(').replace('<', '(').startswith(t) for t in types):
                             words.insert(1, "BOOLEAN")
 
@@ -127,9 +127,14 @@ class CommandOptions(Screen):
             )
 
             for k, v in arguments.items():
+
+                type = Static(f"[b][yellow]{v[0]}[/]", name=f"{v[0]}")
+                type.styles.width = 10
+                type.styles.border = ("blank", "red")
+
                 self.query_one("#booklet-vertical").mount(Container(
-                    Static(f"[b][cyan]{k}[/][/]", classes="name", id=f"--{k}"),
-                    Static(f"[b][green]{v[0]}[/]", classes="types"),
+                    Static(f"[b][cyan]{k}[/][/]", classes="name", id=f"--argument--{k}"),
+                    type,
                     Static(f"[b]{' '.join(v[1:])}[/]", classes="description"),
                     Input(placeholder=f"{k}....", classes="input", name="input"),
                     Button("one more", classes="buttons", id=f"one_more-{index}"),

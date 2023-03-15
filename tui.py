@@ -3,11 +3,11 @@ import subprocess
 
 from textual.app import App
 from textual.binding import Binding
-from textual.containers import Horizontal
-from textual.widgets import Button, Static, Input
+from textual.widgets import Button, Input
 from textual import events
 from textual.pilot import Pilot
 
+from rich.console import Console
 from typing import Tuple, List
 
 from typer_to_textual.command_options import CommandOptions
@@ -15,26 +15,27 @@ from typer_to_textual.homepage import HomePage
 from typer_to_textual.show import Show
 
 
-def homepage_output() -> Tuple[List[str], str]:
-
-    try:
-        if len(sys.argv) != 2:
-            raise RuntimeError("pass exactly two arguments")
-    except RuntimeError as e:
-        print(f"Error: {str(e)}")
-        exit()
-
-    application = sys.argv[1]
+def maximize() -> None:
 
     result = subprocess.run(["xdotool", "getactivewindow"], capture_output=True)
     window_id = result.stdout.decode().strip()
-
-    # ingrandisci la finestra corrente
     subprocess.run(["xdotool", "windowsize", window_id, "70%", "70%"])
 
-    result = subprocess.run([application, "--help"], capture_output=True)
+def homepage_output() -> Tuple[List[str], str]:
 
-    return result.stdout.decode().split('\n'), application
+    if len(sys.argv) != 2:
+        Console().print("[bold][red]Error[/red]: Pass only the name of application")
+        sys.exit(1)
+
+    application = sys.argv[1]
+    maximize()
+
+    try:
+        result = subprocess.run([application, "--help"], capture_output=True)
+        return result.stdout.decode().split('\n'), application
+    except FileNotFoundError:
+        Console().print("[bold][red]Error[/red]: The application is not found")
+        sys.exit(1)
 
 
 class Tui(App):
@@ -56,29 +57,22 @@ class Tui(App):
     async def on_key(self, event: events.Key):
         if event.key == "up":
             pilot = Pilot(self)
-            #await pilot.press("enter")
             await pilot.press("shift+tab")
         if event.key == "down":
             pilot = Pilot(self)
-            #await pilot.press("enter")
             await pilot.press("tab")
 
     def action_key_escape(self) -> None:
         self.exit()
 
-    def call_button(self, command: str) -> List[str]:
+    def call_command(self, command: str) -> List[str]:
 
-        result = subprocess.run(["xdotool", "getactivewindow"], capture_output=True)
-        window_id = result.stdout.decode().strip()
-
-        # ingrandisci la finestra corrente
-        subprocess.run(["xdotool", "windowsize", window_id, "70%", "70%"])
-
+        maximize()
         result = subprocess.run([self.application, command, "--help"], capture_output=True)
 
         return result.stdout.decode().split('\n')
 
-    def buttons(self):
+    def command_buttons(self):
         start_commands = False
         buttons = {}
         for index, line in enumerate(self.output, start=1):
@@ -105,14 +99,14 @@ class Tui(App):
 
     def on_button_pressed(self, event: Button.Pressed):
 
-        values = self.buttons()
+        values = self.command_buttons()
         buttons = values.keys()
 
         if event.button.id in buttons:
 
             description = values[event.button.id]
             if not self.is_screen_installed(event.button.id):
-                result = self.call_button(event.button.id)
+                result = self.call_command(event.button.id)
                 self.install_screen(CommandOptions(result, event.button.id, description), name=event.button.id)
             self.push_screen(event.button.id)
 
@@ -140,12 +134,12 @@ class Tui(App):
                     if index == 2 and i.name != "BOOLEAN":
                         tupla = i.name.split(" ")
                         if len(tupla) == 1:
-                            if tupla[0] == "TEXT":
-                                type = "TEXT"
-                            elif tupla[0] == "INTEGER":
+                            if tupla[0] == "INTEGER":
                                 type = "INTEGER"
-                            else:
+                            elif tupla[0] == "FLOAT":
                                 type = "FLOAT"
+                            else:
+                                type = "TEXT"
                         else:
                             type = "TUPLE"
 
@@ -208,7 +202,9 @@ class Tui(App):
                                         command_data[key].append(i.value)
                     elif not diversi:
                         for index, i in enumerate(element.query(".input"), start=1):
-                            if i.value != '':
+                            if "--argument--" in key and i.value != '':
+                                lista.append(i.value)
+                            elif i.value != '':
                                 lista.append(key)
                                 lista.append(i.value)
                 else:
@@ -226,11 +222,26 @@ class Tui(App):
 
         if event.button.id.startswith("one_more-"):
             index = event.button.id.split("-")[1]
-            placeholder = self.query(CommandOptions).last().query_one(f"#container-{index}").query_one(".name").id.replace("--", "")
+            placeholder = self.query(CommandOptions).last().query_one(f"#container-{index}").query_one(".name").id
+            if "--argument" in placeholder:
+                placeholder = placeholder.replace("--argument--", "")
+            else:
+                placeholder = placeholder.replace("--", "")
             self.query(CommandOptions).last().query_one(f"#container-{index}").mount(Input(placeholder=f"{placeholder}....", classes="input"), before=3)
 
-    def action_pop_screen(self):
-        self.uninstall_screen(self.pop_screen())
+    async def action_pop_screen(self):
+
+        input_has_focus = any(i.has_focus for i in self.query("Input"))
+
+        if input_has_focus:
+            for i in self.query("Input"):
+                if i.has_focus:
+                    i.value = i.value + 'r'
+                    pilot = Pilot(self)
+                    await pilot.press("right")
+                    break
+        else:
+            self.uninstall_screen(self.pop_screen())
 
 
 if __name__ == "__main__":

@@ -254,19 +254,22 @@ def booklet_options(output):
 
 
 if __name__ == "__main__":
-    """average_to_achieve = sys.argv[1]
-    weighted_average = sys.argv[2]
+
+    average_to_achieve = "29"
+    weighted_average = "26.40"
     weighted_average.replace(",", ".")
-    remaining_cfu = sys.argv[3]
-    first = (float(average_to_achieve) * 120)
-    second = (float(weighted_average) * float(96))
+    remaining_cfu = "12"
+    actual_cfu = "96"
+    total = int(actual_cfu) + int(remaining_cfu)
+    first = (float(average_to_achieve) * total)
+    second = (float(weighted_average) * float(actual_cfu))
     grade_to_obtain = (first - second) \
                       / float(remaining_cfu)
     print(first)
     print(second)
-    print(grade_to_obtain)"""
+    print(grade_to_obtain)
 
-    result = subprocess.run(
+    """result = subprocess.run(
         ["esse3-student", "--help"],
         capture_output=True,
     )
@@ -295,6 +298,6 @@ if __name__ == "__main__":
             words = list(filter(bool, words))
             buttons.append(words[1])
 
-    print(buttons)
+    print(buttons)"""
 
 
