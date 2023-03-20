@@ -70,5 +70,5 @@ class Show(Screen):
         asyncio.create_task(self.run_button())
 
     BINDINGS = [
-        Binding(key="r", action="app.pop_screen", description="return"),
+        Binding(key="r", action="app.pop_screen_n('show')", description="return"),
     ]

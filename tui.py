@@ -16,10 +16,21 @@ from typer_to_textual.show import Show
 
 
 def maximize() -> None:
-
     result = subprocess.run(["xdotool", "getactivewindow"], capture_output=True)
     window_id = result.stdout.decode().strip()
     subprocess.run(["xdotool", "windowsize", window_id, "70%", "70%"])
+
+    # Get the screen resolution
+    res = subprocess.check_output("xrandr | grep '\*' | awk '{print $1}'", shell=True).decode().strip().split('x')
+    screen_width = int(res[0])
+    screen_height = int(res[1])
+
+    # Calculate the window position to center it on the screen
+    x_pos = int((screen_width - (screen_width * 0.7)) / 2)
+    y_pos = int((screen_height - (screen_height * 0.7)) / 2)
+
+    # Move the window to the calculated position
+    subprocess.run(["xdotool", "windowmove", window_id, str(x_pos), str(y_pos)])
 
 def homepage_output() -> Tuple[List[str], str]:
 
@@ -97,6 +108,78 @@ class Tui(App):
 
         return buttons
 
+    """def check(self, screen: str, elements: str):
+        
+        for element in self.query(f"{screen}").last().query(f".{elements}"):
+            key = element.query_one(".name").id
+            input_type = ''
+            tuple_types = []
+
+            # Iterate over the static elements and extract the type information
+            for index, static_element in enumerate(element.query("Static"), start=1):
+                if index == 2 and static_element.name != "BOOLEAN":
+                    tuple_types = static_element.name.split(" ")
+                    if len(tuple_types) == 1:
+                        if tuple_types[0] == "INTEGER":
+                            input_type = "INTEGER"
+                        elif tuple_types[0] == "FLOAT":
+                            input_type = "FLOAT"
+                        else:
+                            input_type = "TEXT"
+                    else:
+                        input_type = "TUPLE"
+
+            # Validate input values based on the input type
+            if input_type == "INTEGER" or input_type == "FLOAT":
+                for input_element in element.query(".input"):
+                    try:
+                        if input_element.value != "":
+                            if input_type == "INTEGER":
+                                int(input_element.value)
+                            else:
+                                float(input_element.value)
+                        input_element.styles.border = ("blank", "red")
+                    except ValueError:
+                        almeno_uno = True
+                        input_element.styles.border = ("tall", "red")
+
+            elif input_type == "TUPLE":
+                for index, input_element in enumerate(element.query(".input")):
+                    expected_type = {
+                        "INTEGER": int,
+                        "TEXT": str,
+                        "FLOAT": float
+                    }.get(tuple_types[index], None)
+
+                    try:
+                        if input_element.value != "":
+                            expected_type(input_element.value)
+                        input_element.styles.border = ("blank", "red")
+                    except ValueError:
+                        almeno_uno = True
+                        input_element.styles.border = ("tall", "red")
+
+            if len(element.query(".input")) > 0:
+                diversi = len(set(i.placeholder for i in element.query(".input"))) > 1
+                if diversi:
+                    for index, i in enumerate(element.query(".input"), start=1):
+                        if i.value != '':
+                            if index == 1:
+                                command_data[key] = [i.value]
+                            else:
+                                command_data[key].append(i.value)
+                else:
+                    for index, i in enumerate(element.query(".input"), start=1):
+                        if "--argument--" in key and i.value != '':
+                            lista.append(i.value)
+                        elif i.value != '':
+                            lista.append(key)
+                            lista.append(i.value)
+            else:
+                if str(element.query_one("Checkbox").value) == "True":
+                    command_data[key] = "BOOL"
+    """
+
     def on_button_pressed(self, event: Button.Pressed):
 
         values = self.command_buttons()
@@ -128,79 +211,63 @@ class Tui(App):
 
             for element in self.query(CommandOptions).last().query(".booklet-horizontal"):
                 key = element.query_one(".name").id
-                type = ''
-                tupla = []
-                for index, i in enumerate(element.query("Static"), start=1):
-                    if index == 2 and i.name != "BOOLEAN":
-                        tupla = i.name.split(" ")
-                        if len(tupla) == 1:
-                            if tupla[0] == "INTEGER":
-                                type = "INTEGER"
-                            elif tupla[0] == "FLOAT":
-                                type = "FLOAT"
+                input_type = ''
+                tuple_types = []
+
+                # Iterate over the static elements and extract the type information
+                for index, static_element in enumerate(element.query("Static"), start=1):
+                    if index == 2 and static_element.name != "BOOLEAN":
+                        tuple_types = static_element.name.split(" ")
+                        if len(tuple_types) == 1:
+                            if tuple_types[0] == "INTEGER":
+                                input_type = "INTEGER"
+                            elif tuple_types[0] == "FLOAT":
+                                input_type = "FLOAT"
                             else:
-                                type = "TEXT"
+                                input_type = "TEXT"
                         else:
-                            type = "TUPLE"
+                            input_type = "TUPLE"
 
-                if type == "INTEGER":
-                    for i in element.query(".input"):
-                        if i.value != '':
-                            try:
-                                converted_value = int(i.value)
-                                if isinstance(converted_value, int):
-                                    i.styles.border = ("blank", "red")
-                            except ValueError:
-                                almeno_uno = True
-                                i.styles.border = ("tall", "red")
+                # Validate input values based on the input type
+                if input_type == "INTEGER" or input_type == "FLOAT":
+                    for input_element in element.query(".input"):
+                        try:
+                            if input_element.value != "":
+                                if input_type == "INTEGER":
+                                    int(input_element.value)
+                                else:
+                                    float(input_element.value)
+                            input_element.styles.border = ("blank", "red")
+                        except ValueError:
+                            almeno_uno = True
+                            input_element.styles.border = ("tall", "red")
 
-                elif type == "FLOAT":
-                    for i in element.query(".input"):
-                        if i.value != '':
-                            try:
-                                converted_value = float(i.value)
-                                if isinstance(converted_value, float):
-                                    i.styles.border = ("blank", "red")
-                            except ValueError:
-                                almeno_uno = True
-                                i.styles.border = ("tall", "red")
+                elif input_type == "TUPLE":
+                    for index, input_element in enumerate(element.query(".input")):
+                        expected_type = {
+                            "INTEGER": int,
+                            "TEXT": str,
+                            "FLOAT": float
+                        }.get(tuple_types[index], None)
 
-                elif type == "TUPLE":
-                    for index, i in enumerate(element.query(".input"), start=0):
-                        if i.value != '':
-                            tipo = tupla[index]
-                            if tipo == "INTEGER":
-                                tipo = 'int'
-                            if tipo == "TEXT":
-                                tipo = 'str'
-                            if tipo == "FLOAT":
-                                tipo = 'float'
-                            try:
-                                converted_value = eval(tipo)(i.value)
-                                if isinstance(converted_value, eval(tipo)):
-                                    i.styles.border = ("blank", "red")
-                            except ValueError:
-                                almeno_uno = True
-                                i.styles.border = ("tall", "red")
+                        try:
+                            if input_element.value != "":
+                                expected_type(input_element.value)
+                            input_element.styles.border = ("blank", "red")
+                        except ValueError:
+                            almeno_uno = True
+                            input_element.styles.border = ("tall", "red")
 
                 if len(element.query(".input")) > 0:
-                    tmp = ''
-                    diversi = False
-                    for index, i in enumerate(element.query(".input"), start=1):
-                        if index == 1:
-                            tmp = i.placeholder
-                        if index == 2:
-                            if i.placeholder != tmp:
-                                diversi = True
+                    diversi = len(set(i.placeholder for i in element.query(".input"))) > 1
                     if diversi:
-                        if len(element.query(".input")) > 0:
-                            for index, i in enumerate(element.query(".input"), start=1):
-                                if i.value != '':
-                                    if index == 1:
-                                        command_data[key] = [i.value]
-                                    else:
-                                        command_data[key].append(i.value)
-                    elif not diversi:
+                        for index, i in enumerate(element.query(".input"), start=1):
+                            if i.value != '':
+                                if index == 1:
+                                    command_data[key] = [i.value]
+                                else:
+                                    command_data[key].append(i.value)
+                    else:
                         for index, i in enumerate(element.query(".input"), start=1):
                             if "--argument--" in key and i.value != '':
                                 lista.append(i.value)
@@ -222,14 +289,12 @@ class Tui(App):
 
         if event.button.id.startswith("one_more-"):
             index = event.button.id.split("-")[1]
-            placeholder = self.query(CommandOptions).last().query_one(f"#container-{index}").query_one(".name").id
-            if "--argument" in placeholder:
-                placeholder = placeholder.replace("--argument--", "")
-            else:
-                placeholder = placeholder.replace("--", "")
-            self.query(CommandOptions).last().query_one(f"#container-{index}").mount(Input(placeholder=f"{placeholder}....", classes="input"), before=3)
+            placeholder = self.query(CommandOptions).last().query_one(f"#container-{index} .name").id
+            placeholder = placeholder.replace("--argument--", "").replace("--", "")
+            input_element = Input(placeholder=f"{placeholder}....", classes="input")
+            self.query(CommandOptions).last().query_one(f"#container-{index}").mount(input_element, before=3)
 
-    async def action_pop_screen(self):
+    async def action_pop_screen_n(self, screen):
 
         input_has_focus = any(i.has_focus for i in self.query("Input"))
 
@@ -241,7 +306,10 @@ class Tui(App):
                     await pilot.press("right")
                     break
         else:
-            self.uninstall_screen(self.pop_screen())
+            if screen == "show":
+                self.uninstall_screen(self.pop_screen())
+            else:
+                self.pop_screen()
 
 
 if __name__ == "__main__":
