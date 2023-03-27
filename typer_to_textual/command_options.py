@@ -1,3 +1,5 @@
+from typing import re
+
 import typer
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -179,10 +181,18 @@ class CommandOptions(Screen):
                     type = Static(f"[b][yellow]{v[0]}[/]", name=f"{v[0]}")
                     type.styles.width = 10
                     type.styles.border = ("blank", "red")
+                    description = f"{' '.join(v[1:])}"
+                    id = k
+                    if "(required)" in description:
+                        description = description.replace("(required)", "")
+                        id = k + "-required"
+                        d = Static(f"[b]{description} [red](required)[/red][/]", classes="description")
+                    else:
+                        d = Static(f"[b]{description}[/]", classes="description")
                     self.query_one("#booklet-vertical").mount(Container(
-                        Static(f"[b][cyan]{k}[/][/]", classes="name", id=f"--{k}"),
+                        Static(f"[b][cyan]{k}[/][/]", classes="name", id=f"--{id}"),
                         type,
-                        Static(f"[b]{' '.join(v[1:])}[/]", classes="description"),
+                        d,
                         Input(placeholder=f"{k}....", classes="input", name="input"),
                         Button("one more", classes="buttons", id=f"one_more-{index}"),
                         classes="booklet-horizontal",

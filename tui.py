@@ -45,7 +45,7 @@ def homepage_output() -> Tuple[List[str], str]:
         result = subprocess.run([application, "--help"], capture_output=True)
         return result.stdout.decode().split('\n'), application
     except FileNotFoundError:
-        Console().print("[bold][red]Error[/red]: The application is not found")
+        Console().print(f"[bold][red]Error[/red]: The application: '{application}' is not found")
         sys.exit(1)
 
 
@@ -76,10 +76,19 @@ class Tui(App):
     def action_key_escape(self) -> None:
         self.exit()
 
-    def call_command(self, command: str) -> List[str]:
+    def call_command(self, command: str, homepage_data) -> List[str]:
 
         maximize()
-        result = subprocess.run([self.application, command, "--help"], capture_output=True)
+
+        args = [self.application]
+
+        for option in homepage_data:
+            args.append(option)
+
+        args.append(command)
+        args.append("--help")
+
+        result = subprocess.run(args, capture_output=True)
 
         return result.stdout.decode().split('\n')
 
@@ -108,26 +117,41 @@ class Tui(App):
 
         return buttons
 
-    """def check(self, screen: str, elements: str):
-        
+    def check(self, screen: str, elements: str):
+
+        almeno_uno = False
+
         for element in self.query(f"{screen}").last().query(f".{elements}"):
-            key = element.query_one(".name").id
             input_type = ''
             tuple_types = []
 
             # Iterate over the static elements and extract the type information
-            for index, static_element in enumerate(element.query("Static"), start=1):
-                if index == 2 and static_element.name != "BOOLEAN":
-                    tuple_types = static_element.name.split(" ")
-                    if len(tuple_types) == 1:
-                        if tuple_types[0] == "INTEGER":
-                            input_type = "INTEGER"
-                        elif tuple_types[0] == "FLOAT":
-                            input_type = "FLOAT"
+            if screen == "CommandOptions":
+                for index, static_element in enumerate(element.query("Static"), start=1):
+                    if index == 2 and static_element.name != "BOOLEAN":
+                        tuple_types = static_element.name.split(" ")
+                        if len(tuple_types) == 1:
+                            if tuple_types[0] == "INTEGER":
+                                input_type = "INTEGER"
+                            elif tuple_types[0] == "FLOAT":
+                                input_type = "FLOAT"
+                            else:
+                                input_type = "TEXT"
                         else:
-                            input_type = "TEXT"
-                    else:
-                        input_type = "TUPLE"
+                            input_type = "TUPLE"
+            else:
+                for index, input_element in enumerate(element.query("Input"), start=1):
+                    if index == 1 and input_element.name != "BOOLEAN":
+                        tuple_types = input_element.name.split(" ")
+                        if len(tuple_types) == 1:
+                            if tuple_types[0] == "INTEGER":
+                                input_type = "INTEGER"
+                            elif tuple_types[0] == "FLOAT":
+                                input_type = "FLOAT"
+                            else:
+                                input_type = "TEXT"
+                        else:
+                            input_type = "TUPLE"
 
             # Validate input values based on the input type
             if input_type == "INTEGER" or input_type == "FLOAT":
@@ -138,7 +162,7 @@ class Tui(App):
                                 int(input_element.value)
                             else:
                                 float(input_element.value)
-                        input_element.styles.border = ("blank", "red")
+                        input_element.styles.border = None
                     except ValueError:
                         almeno_uno = True
                         input_element.styles.border = ("tall", "red")
@@ -154,31 +178,76 @@ class Tui(App):
                     try:
                         if input_element.value != "":
                             expected_type(input_element.value)
-                        input_element.styles.border = ("blank", "red")
+                        input_element.styles.border = None
                     except ValueError:
                         almeno_uno = True
                         input_element.styles.border = ("tall", "red")
 
+        for element in self.query(f"{screen}").last().query(f".{elements}"):
+            for index, e in enumerate(element.query("Static"), start=1):
+                if index == 1:
+                    key = e.id
+                    if "-required" in key:
+                        for input_element in element.query(".input"):
+                            if input_element.value == "":
+                                almeno_uno = True
+                                input_element.styles.border = ("tall", "red")
+                            else:
+                                input_element.styles.border = None
+
+        return almeno_uno
+
+    def homepage_field(self) -> list:
+
+        homepage_data = []
+        for element in self.query_one(HomePage).query(".homepage-horizontal"):
+            key = element.query_one(".name").id
+            key = key.replace("-required", "")
+            if len(element.query("Input")) > 0:
+                for index, i in enumerate(element.query("Input"), start=1):
+                    if i.value != '':
+                        homepage_data.append(key)
+                        homepage_data.append(i.value)
+            else:
+                for index, i in enumerate(element.query("Checkbox"), start=1):
+                    if str(i.value) == "True":
+                        homepage_data.append(key)
+
+        return homepage_data
+
+    def commandpage_field(self):
+
+        command_data = {}
+        lista = []
+        for element in self.query(CommandOptions).last().query(".booklet-horizontal"):
+            key = element.query_one(".name").id
             if len(element.query(".input")) > 0:
+                tmp = key
+                if "-required" in key:
+                    tmp = tmp.replace("-required", "")
                 diversi = len(set(i.placeholder for i in element.query(".input"))) > 1
                 if diversi:
                     for index, i in enumerate(element.query(".input"), start=1):
                         if i.value != '':
-                            if index == 1:
-                                command_data[key] = [i.value]
+                            if tmp not in command_data:
+                                command_data[tmp] = [i.value]
                             else:
-                                command_data[key].append(i.value)
+                                command_data[tmp].append(i.value)
                 else:
                     for index, i in enumerate(element.query(".input"), start=1):
-                        if "--argument--" in key and i.value != '':
+                        if "--argument--" in tmp and i.value != '':
                             lista.append(i.value)
                         elif i.value != '':
-                            lista.append(key)
+                            lista.append(tmp)
                             lista.append(i.value)
             else:
+                tmp = key
+                if "-required" in key:
+                    tmp = tmp.replace("-required", "")
                 if str(element.query_one("Checkbox").value) == "True":
-                    command_data[key] = "BOOL"
-    """
+                    command_data[tmp] = "BOOL"
+
+        return command_data, lista
 
     def on_button_pressed(self, event: Button.Pressed):
 
@@ -187,110 +256,37 @@ class Tui(App):
 
         if event.button.id in buttons:
 
+            almeno_uno = self.check("HomePage", "homepage-horizontal")
+            if almeno_uno:
+                return
+
             description = values[event.button.id]
+            homepage_data = self.homepage_field()
+
             if not self.is_screen_installed(event.button.id):
-                result = self.call_command(event.button.id)
+                result = self.call_command(event.button.id, homepage_data)
                 self.install_screen(CommandOptions(result, event.button.id, description), name=event.button.id)
             self.push_screen(event.button.id)
 
         elif event.button.id.startswith("show-"):
 
-            homepage_data = {}
-
-            for element in self.query_one(HomePage).query():
-                if element.name == "checkbox":
-                    if str(element.value) == "True":
-                        homepage_data[element.id] = "BOOL"
-                elif element.name == "input":
-                    if element.value != '':
-                        homepage_data[element.id] = element.value
-
-            command_data = {}
-            lista = []
-            almeno_uno = False
-
-            for element in self.query(CommandOptions).last().query(".booklet-horizontal"):
-                key = element.query_one(".name").id
-                input_type = ''
-                tuple_types = []
-
-                # Iterate over the static elements and extract the type information
-                for index, static_element in enumerate(element.query("Static"), start=1):
-                    if index == 2 and static_element.name != "BOOLEAN":
-                        tuple_types = static_element.name.split(" ")
-                        if len(tuple_types) == 1:
-                            if tuple_types[0] == "INTEGER":
-                                input_type = "INTEGER"
-                            elif tuple_types[0] == "FLOAT":
-                                input_type = "FLOAT"
-                            else:
-                                input_type = "TEXT"
-                        else:
-                            input_type = "TUPLE"
-
-                # Validate input values based on the input type
-                if input_type == "INTEGER" or input_type == "FLOAT":
-                    for input_element in element.query(".input"):
-                        try:
-                            if input_element.value != "":
-                                if input_type == "INTEGER":
-                                    int(input_element.value)
-                                else:
-                                    float(input_element.value)
-                            input_element.styles.border = ("blank", "red")
-                        except ValueError:
-                            almeno_uno = True
-                            input_element.styles.border = ("tall", "red")
-
-                elif input_type == "TUPLE":
-                    for index, input_element in enumerate(element.query(".input")):
-                        expected_type = {
-                            "INTEGER": int,
-                            "TEXT": str,
-                            "FLOAT": float
-                        }.get(tuple_types[index], None)
-
-                        try:
-                            if input_element.value != "":
-                                expected_type(input_element.value)
-                            input_element.styles.border = ("blank", "red")
-                        except ValueError:
-                            almeno_uno = True
-                            input_element.styles.border = ("tall", "red")
-
-                if len(element.query(".input")) > 0:
-                    diversi = len(set(i.placeholder for i in element.query(".input"))) > 1
-                    if diversi:
-                        for index, i in enumerate(element.query(".input"), start=1):
-                            if i.value != '':
-                                if index == 1:
-                                    command_data[key] = [i.value]
-                                else:
-                                    command_data[key].append(i.value)
-                    else:
-                        for index, i in enumerate(element.query(".input"), start=1):
-                            if "--argument--" in key and i.value != '':
-                                lista.append(i.value)
-                            elif i.value != '':
-                                lista.append(key)
-                                lista.append(i.value)
-                else:
-                    if str(element.query_one("Checkbox").value) == "True":
-                        command_data[key] = "BOOL"
-
-            command = event.button.id.replace("show-", "")
-
+            almeno_uno = self.check("CommandOptions", "booklet-horizontal")
             if almeno_uno:
                 return
+
+            homepage_data = self.homepage_field()
+            command_data, lista = self.commandpage_field()
+
+            command = event.button.id.replace("show-", "")
 
             if not self.is_screen_installed(event.button.id):
                 self.install_screen(Show(self.application, command, homepage_data, command_data, lista), name=event.button.id)
             self.push_screen(event.button.id)
 
-        if event.button.id.startswith("one_more-"):
+        elif event.button.id.startswith("one_more-"):
             index = event.button.id.split("-")[1]
             placeholder = self.query(CommandOptions).last().query_one(f"#container-{index} .name").id
-            placeholder = placeholder.replace("--argument--", "").replace("--", "")
+            placeholder = placeholder.replace("--argument--", "").replace("--", "").replace("-required","")
             input_element = Input(placeholder=f"{placeholder}....", classes="input")
             self.query(CommandOptions).last().query_one(f"#container-{index}").mount(input_element, before=3)
 

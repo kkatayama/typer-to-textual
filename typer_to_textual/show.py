@@ -33,10 +33,8 @@ class Show(Screen):
 
         args = [self.application]
 
-        for key, value in self.homepage_data.items():
-            args.append(key)
-            if value != "BOOL":
-                args.append(value)
+        for option in self.homepage_data:
+            args.append(option)
 
         args.append(self.command)
 

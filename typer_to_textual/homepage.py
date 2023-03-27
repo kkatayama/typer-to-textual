@@ -122,24 +122,40 @@ class HomePage(Screen):
                 )
             )
             for k, v in options.items():
+                type = Static(f"[b][yellow]{v[0]}[/]", name=f"{v[0]}", classes="type")
+                type.styles.width = 10
                 if v[0] == "BOOLEAN":
-                    self.query_one(Vertical).mount(Horizontal(
-                        Static(f"[bold]{k}:", classes="checkbox-name"),
-                        Checkbox(id=f"--{k}", name="checkbox"),
-                        Static(f"[bold]{v[1]}"),
-                        classes="homepage-horizontal-bool"
+                    self.query_one(Vertical).mount(Container(
+                        Static(f"[cyan][bold]{k}", classes="name", id=f"--{k}"),
+                        type,
+                        Static(f"[bold]{v[1]}", classes="description-bool"),
+                        Checkbox(classes="checkbox", name="checkbox"),
+                        classes="homepage-horizontal"
                     ))
-                else:
+                elif v[0] in ["INTEGER", "FLOAT", "TEXT", "TUPLE", "UUID", "PATH", "FILENAME", "BOOLEAN"]:
+                    description = f"{v[1]}"
+                    id = k
+                    if "(required)" in description:
+                        description = description.replace("(required)", "")
+                        id = k + "-required"
+                        description = Static(f"[bold]{description} [red](required)[/red]", classes="description")
+                    else:
+                        description = Static(f"[bold]{description}", classes="description")
+
                     if k == "password":
-                        self.query_one(Vertical).mount(Horizontal(
-                            Input(placeholder=f"{k}....", password=True, id=f"--{k}", name="input"),
-                            Static(f"[bold]{v[1]}"),
+                        self.query_one(Vertical).mount(Container(
+                            Static(f"[cyan]{k}", classes="name", id=f"--{id}"),
+                            type,
+                            description,
+                            Input(placeholder=f"{k}....", password=True, name=f"{v[0]}&{k}", classes="input"),
                             classes="homepage-horizontal"
                         ))
                     else:
-                        self.query_one(Vertical).mount(Horizontal(
-                            Input(placeholder=f"{k}....", id=f"--{k}", name="input"),
-                            Static(f"[bold]{v[1]}"),
+                        self.query_one(Vertical).mount(Container(
+                            Static(f"[cyan]{k}", classes="name", id=f"--{id}"),
+                            type,
+                            description,
+                            Input(placeholder=f"{k}....", name=f"{v[0]}&{k}", classes="input"),
                             classes="homepage-horizontal"
                         ))
 
@@ -153,5 +169,5 @@ class HomePage(Screen):
                 self.query_one(Vertical).mount(Horizontal(
                     Button(f"{command[0]}", id=f"{command[0]}"),
                     Static(f"[bold][#E1C699]{command[1]}", classes="homepage-static-buttons"),
-                    classes="homepage-horizontal"
+                    classes="homepage-horizontal-2"
                 ))

@@ -31,10 +31,58 @@ Screen {
 }
 
 .homepage-horizontal {
+    layout: horizontal;
     border: #1d2e38;
     width: 60%;
     height: auto;
-    align: center middle;
+}
+
+.homepage-horizontal > .name{
+    content-align: center middle;
+    text-style: bold;
+    width: 12;
+    border: blank;
+}
+
+.homepage-horizontal > .type{
+    content-align: center middle;
+    text-style: bold;
+    width: 10;
+    border: blank;
+}
+
+.homepage-horizontal > .description{
+    content-align: center middle;
+    text-style: bold;
+    width: 55%;
+    border: blank;
+}
+
+.homepage-horizontal > .description-bool{
+    content-align: center middle;
+    text-style: bold;
+    width: 65%;
+    border: blank;
+}
+
+.homepage-horizontal > Checkbox{
+    content-align: center middle;
+    width: auto;
+}
+
+.homepage-horizontal > Input{
+    width: 20;
+}
+
+.homepage-horizontal > Button {
+    border: tall #1d2e38;
+    width: auto;
+    background: $primary-background-darken-2;
+    margin-right: 2;
+}
+
+.homepage-horizontal > Button:hover {
+    background: #2d4156;
 }
 
 .homepage-horizontal-options {
@@ -51,46 +99,29 @@ Screen {
     align: center middle;
 }
 
-.homepage-horizontal > .homepage-static-buttons{
+.homepage-horizontal-2 {
+    border: #1d2e38;
+    width: 60%;
+    height: auto;
+    align: center middle;
+}
+
+.homepage-horizontal-2 > .homepage-static-buttons{
     height: auto;
     content-align: center middle;
     border: blank;
     width: 70%;
 }
 
-.homepage-horizontal > Button{
+.homepage-horizontal-2 > Button{
     border: tall #1d2e38;
     width: auto;
     background: $primary-background-darken-2;
     margin-right: 2;
 }
 
-.homepage-horizontal > Button:hover {
+.homepage-horizontal-2 > Button:hover {
     background: #2d4156;
-}
-
-.homepage-horizontal-bool{
-    border: #1d2e38;
-    width: 60%;
-    height: auto;
-
-}
-
-.homepage-horizontal-bool > .checkbox-name{
-    content-align: center middle;
-    width: auto;
-    border: blank;
-}
-
-.homepage-horizontal-bool > Static{
-    content-align: center middle;
-    width: 80%;
-    border: blank;
-}
-
-.homepage-horizontal-bool > Checkbox{
-    content-align: center middle;
-    width: auto;
 }
 
 .options {
@@ -109,32 +140,6 @@ Screen {
     background: $panel;
     border: hkey seagreen;
 }
-
-.homepage-horizontal > Static{
-    content-align: center middle;
-    width: 100%;
-}
-
-.homepage-horizontal > Input{
-    width: 20%;
-    dock: left;
-}
-
-.homepage-horizontal > Checkbox{
-    width: auto;
-}
-
-.homepage-horizontal > Button {
-    border: tall #1d2e38;
-    width: auto;
-    background: $primary-background-darken-2;
-    margin-right: 2;
-}
-
-.homepage-horizontal > Button:hover {
-    background: #2d4156;
-}
-
 
 /* BOOKLET */
 
@@ -210,32 +215,6 @@ Screen {
 .booklet-horizontal-arguments > .input{
     width: 15%;
     dock: right;
-}
-
-.booklet-horizontal-test {
-    layout: horizontal;
-    border: #1d2e38;
-    width: 80%;
-    height: auto;
-}
-
-.booklet-horizontal-test > .description {
-    border: blank;
-    width: 57%;
-}
-
-.booklet-horizontal-test > .types {
-    border: blank;
-    width: 15;
-}
-
-.booklet-horizontal-test > .name {
-    border: blank;
-    width: 15;
-}
-
-.booklet-horizontal-test > .input {
-    width: 5%;
 }
 
 .booklet-horizontal {
