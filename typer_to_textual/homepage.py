@@ -11,8 +11,9 @@ class Header(Static):
 
 class HomePage(Screen):
 
-    def __init__(self, output) -> None:
+    def __init__(self, output, identifier) -> None:
         self.output = output
+        self.identifier = identifier
         super().__init__()
 
     def title(self) -> str:
