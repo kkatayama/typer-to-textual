@@ -1,10 +1,7 @@
-from typing import re
-
-import typer
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.widgets import Static, Button, Footer, Input, Checkbox
-from textual.containers import Container, Vertical, Horizontal
+from textual.containers import Container, Horizontal
 from textual.screen import Screen
 
 

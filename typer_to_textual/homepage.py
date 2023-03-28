@@ -56,33 +56,20 @@ class HomePage(Screen):
                 words = list(filter(bool, words))
 
                 if words:
-
-                    if ',' in words[0]:
-                        words[0] = words[0].split(",")[0]
-                    words[0] = words[0].replace('--', '')
-
-                    if words[0] == "help":
-                        continue
-
-                    if len(words) > 1:
-                        if words[1].startswith("-"):
-                            words.remove(words[1])
-
-                    if len(words) == 1:
-                        words.append("BOOLEAN")
-
-                    if len(words) == 2:
-                        types = ["INTEGER", "FLOAT", "TEXT", "<", "UUID", "PATH", "FILENAME", "BOOLEAN"]
-                        if not any(words[1].replace('[', '(').replace('<', '(').startswith(t) for t in types):
+                    words[0] = words[0].split(",")[0].replace('--', '')
+                    if words[0] != "help":
+                        if len(words) > 1 and words[1].startswith("-"):
+                            words.pop(1)
+                        if len(words) == 1:
+                            words.append("BOOLEAN")
+                        if len(words) == 2 and not any(
+                                words[1].replace('[', '(').replace('<', '(').startswith(t) for t in
+                                ["INTEGER", "FLOAT", "TEXT", "<", "UUID", "PATH", "FILENAME", "BOOLEAN"]):
                             words.insert(1, "BOOLEAN")
+                        words[2:] = [w.replace('[', '(').replace(']', ')') for w in words[2:]]
+                        options[words[0]] = words[1:] + (["No description"] if len(words) == 2 else [])
 
-                    if len(words) == 2:
-                        words.append("No description")
 
-                    for i in range(2, len(words)):
-                        words[i] = words[i].replace('[', '(').replace(']', ')')
-
-                    options[words[0]] = words[1:]
 
             elif start_commands and any(word.isalpha() for word in line.split()):
                 command = line.split(" ")
@@ -118,57 +105,46 @@ class HomePage(Screen):
 
         if options:
             self.query_one(Vertical).mount(Horizontal(
-                    Static("Options", classes="options"),
-                    classes="homepage-horizontal-options"
+                    Static("Options"),
+                    classes="homepage-options-bar"
                 )
             )
             for k, v in options.items():
-                type = Static(f"[b][yellow]{v[0]}[/]", name=f"{v[0]}", classes="type")
-                type.styles.width = 10
-                if v[0] == "BOOLEAN":
-                    self.query_one(Vertical).mount(Container(
-                        Static(f"[cyan][bold]{k}", classes="name", id=f"--{k}"),
-                        type,
-                        Static(f"[bold]{v[1]}", classes="description-bool"),
-                        Checkbox(classes="checkbox", name="checkbox"),
-                        classes="homepage-horizontal"
-                    ))
-                elif v[0] in ["INTEGER", "FLOAT", "TEXT", "TUPLE", "UUID", "PATH", "FILENAME", "BOOLEAN"]:
-                    description = f"{v[1]}"
-                    id = k
-                    if "(required)" in description:
-                        description = description.replace("(required)", "")
-                        id = k + "-required"
-                        description = Static(f"[bold]{description} [red](required)[/red]", classes="description")
-                    else:
-                        description = Static(f"[bold]{description}", classes="description")
 
-                    if k == "password":
-                        self.query_one(Vertical).mount(Container(
-                            Static(f"[cyan]{k}", classes="name", id=f"--{id}"),
-                            type,
-                            description,
-                            Input(placeholder=f"{k}....", password=True, name=f"{v[0]}&{k}", classes="input"),
-                            classes="homepage-horizontal"
-                        ))
-                    else:
-                        self.query_one(Vertical).mount(Container(
-                            Static(f"[cyan]{k}", classes="name", id=f"--{id}"),
-                            type,
-                            description,
-                            Input(placeholder=f"{k}....", name=f"{v[0]}&{k}", classes="input"),
-                            classes="homepage-horizontal"
-                        ))
+                if v[0] == "BOOLEAN":
+                    container = Container(
+                        Static(f"[cyan][bold]{k}", classes="name", id=f"--{k}"),
+                        Static(f"[b][yellow]{v[0]}[/]", name=f"{v[0]}", classes="type"),
+                        Static(f"[bold]{v[1]}", classes="description-bool"),
+                        Checkbox(name="checkbox"),
+                        classes="homepage-horizontal"
+                    )
+                else:
+                    description = v[1].replace("(required)", "").strip()
+                    id = k if "(required)" not in v[1] else f"{k}-required"
+                    required_label = " [red](required)[/red]" if "(required)" in v[1] else ""
+                    description = Static(f"[bold]{description}{required_label}", classes="description")
+                    is_password = True if k == "password" else False
+
+                    container = Container(
+                        Static(f"[cyan]{k}", classes="name", id=f"--{id}"),
+                        Static(f"[b][yellow]{v[0]}[/]", name=f"{v[0]}", classes="type"),
+                        description,
+                        Input(placeholder=f"{k}....", password=is_password, name=f"{v[0]}&{k}", classes="input"),
+                        classes="homepage-horizontal"
+                    )
+
+                self.query_one(Vertical).mount(container)
 
         if commands:
             self.query_one(Vertical).mount(Horizontal(
-                Static("Commands", id="commands"),
-                classes="homepage-horizontal-commands"
+                Static("Commands"),
+                classes="homepage-commands-bar"
                 )
             )
             for command in commands:
-                self.query_one(Vertical).mount(Horizontal(
-                    Button(f"{command[0]}", id=f"{command[0]}"),
-                    Static(f"[bold][#E1C699]{command[1]}", classes="homepage-static-buttons"),
-                    classes="homepage-horizontal-2"
-                ))
+                button = Button(command[0], id=command[0])
+                description = Static(f"[bold][#E1C699]{command[1]}")
+                command_horizontal = Horizontal(button, description, classes="homepage-command")
+
+                self.query_one(Vertical).mount(command_horizontal)

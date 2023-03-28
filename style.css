@@ -30,6 +30,37 @@ Screen {
     align: center middle;
 }
 
+.homepage-options-bar {
+    border: blank;
+    width: 60%;
+    height: auto;
+    align: center middle;
+}
+
+.homepage-options-bar > Static{
+    margin-top: 1;
+    content-align: center middle;
+    min-height: 1;
+    text-style: bold;
+    background: $panel;
+    border: hkey seagreen;
+}
+
+.homepage-commands-bar{
+    border: blank;
+    width: 60%;
+    height: auto;
+    align: center middle;
+}
+
+.homepage-commands-bar > Static{
+    content-align: center middle;
+    min-height: 1;
+    text-style: bold;
+    background: $panel;
+    border: hkey red;
+}
+
 .homepage-horizontal {
     layout: horizontal;
     border: #1d2e38;
@@ -65,80 +96,38 @@ Screen {
     border: blank;
 }
 
-.homepage-horizontal > Checkbox{
+.homepage-horizontal > .checkbox{
     content-align: center middle;
     width: auto;
 }
 
-.homepage-horizontal > Input{
+.homepage-horizontal > .input{
     width: 20;
 }
 
-.homepage-horizontal > Button {
-    border: tall #1d2e38;
-    width: auto;
-    background: $primary-background-darken-2;
-    margin-right: 2;
-}
-
-.homepage-horizontal > Button:hover {
-    background: #2d4156;
-}
-
-.homepage-horizontal-options {
-    border: blank;
-    width: 60%;
-    height: auto;
-    align: center middle;
-}
-
-.homepage-horizontal-commands{
-    border: blank;
-    width: 60%;
-    height: auto;
-    align: center middle;
-}
-
-.homepage-horizontal-2 {
+.homepage-command {
     border: #1d2e38;
     width: 60%;
     height: auto;
     align: center middle;
 }
 
-.homepage-horizontal-2 > .homepage-static-buttons{
+.homepage-command > Static{
     height: auto;
     content-align: center middle;
     border: blank;
     width: 70%;
 }
 
-.homepage-horizontal-2 > Button{
+.homepage-command > Button{
     border: tall #1d2e38;
     width: auto;
     background: $primary-background-darken-2;
     margin-right: 2;
 }
 
-.homepage-horizontal-2 > Button:hover {
+.homepage-command > Button:hover {
     background: #2d4156;
-}
-
-.options {
-    content-align: center middle;
-    min-height: 1;
-    text-style: bold;
-    background: $panel;
-    border: hkey red;
-}
-
-#commands{
-    margin-top: 1;
-    content-align: center middle;
-    min-height: 1;
-    text-style: bold;
-    background: $panel;
-    border: hkey seagreen;
 }
 
 /* BOOKLET */
