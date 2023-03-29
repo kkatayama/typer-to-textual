@@ -132,37 +132,21 @@ Screen {
 
 /* BOOKLET */
 
-#booklet-vertical {
+#command-vertical {
     layout: vertical;
     overflow: auto auto;
     height: auto;
     align: center middle;
 }
 
-.command-horizontal-options {
+.command-options-bar {
     border: blank;
     width: 80%;
     height: auto;
     align: center middle;
 }
 
-.booklet-horizontal-arguments {
-    border: #1d2e38;
-    width: 80%;
-    height: auto;
-}
-
-.command-options {
-    margin-top: 1;
-    margin-bottom: 1;
-    content-align: center middle;
-    min-height: 1;
-    text-style: bold;
-    background: $panel;
-    border: hkey red;
-}
-
-.command-arguments {
+.command-options-bar > .command-arguments {
     margin-top: 1;
     margin-bottom: 1;
     content-align: center middle;
@@ -172,7 +156,63 @@ Screen {
     border: hkey green;
 }
 
-.booklet-horizontal-button {
+.command-options-bar > .command-options {
+    margin-top: 1;
+    margin-bottom: 1;
+    content-align: center middle;
+    min-height: 1;
+    text-style: bold;
+    background: $panel;
+    border: hkey red;
+}
+
+.command-horizontal {
+    layout: horizontal;
+    border: #1d2e38;
+    width: 80%;
+    height: auto;
+}
+
+.command-horizontal > Checkbox {
+    height: auto;
+    width: auto;
+}
+
+.command-horizontal > Checkbox:hover {
+    background: #2d4156;
+}
+
+.command-horizontal > .description {
+    border: blank;
+    width: 40%;
+}
+
+.command-horizontal > .type {
+    border: blank;
+    width: 10;
+}
+
+.command-horizontal > .name {
+    border: blank;
+    width: 15;
+}
+
+.command-horizontal > .input {
+    width: 15%;
+}
+
+.command-horizontal > .buttons {
+    margin-left: 6;
+    margin-right: 1;
+    min-width: 5;
+    background: $primary-background-darken-2;
+}
+
+.command-horizontal > .buttons:hover {
+    background: #2d4156;
+}
+
+.command-horizontal-run {
     width: 80%;
     height: auto;
     align: center middle;
@@ -180,126 +220,11 @@ Screen {
     margin-bottom: 1;
 }
 
-.booklet-horizontal-button > Button {
-    border: tall #1d2e38;
-    width: auto;
-    background: $primary-background-darken-2;
-    margin-right: 2;
-}
-
-.booklet-horizontal-button > Button:hover {
-    background: #2d4156;
-}
-
-.booklet-horizontal-arguments > .name{
-    border: blank;
-    width: 15%;
-}
-
-.booklet-horizontal-arguments > .description{
-    border: blank;
-    width: 80%;
-}
-
-.booklet-horizontal-arguments > .input{
-    width: 15%;
-    dock: right;
-}
-
-.booklet-horizontal {
-    layout: horizontal;
-    border: #1d2e38;
-    width: 80%;
-    height: auto;
-}
-
-.booklet-horizontal > Checkbox {
-    height: auto;
-    width: auto;
-}
-
-.booklet-horizontal > .description {
-    border: blank;
-    width: 40%;
-}
-
-.booklet-horizontal > .types {
-    border: blank;
-    width: 10;
-}
-
-.booklet-horizontal > .name {
-    border: blank;
-    width: 15;
-}
-
-.booklet-horizontal > .input {
-    width: 15%;
-}
-
-.booklet-horizontal > .buttons {
-    margin-left: 6;
-    margin-right: 1;
-    min-width: 5;
-    background: $primary-background-darken-2;
-}
-
-.booklet-horizontal > .buttons:hover {
-    background: #2d4156;
-}
-
-.booklet-horizontal > Checkbox:hover {
-    background: #2d4156;
-}
-
-.booklet-horizontal > .run {
-    border: tall #1d2e38;
-    width: auto;
-    background: $primary-background-darken-2;
-    margin-right: 2;
-}
-
-.booklet-horizontal > .run {
-    background: #2d4156;
-}
-
-.booklet-horizontal-bool {
-    border: #1d2e38;
-    width: 80%;
-    height: auto;
-}
-
-.booklet-horizontal-bool  > .description {
-    border: blank;
-    width: 57%;
-}
-
-.booklet-horizontal-bool > .types {
-    border: blank;
-    width: 15;
-}
-
-.booklet-horizontal-bool > .name {
-    border: blank;
-    width: 15;
-}
-
-
 .empty {
     align: center middle;
     height: 1fr;
     width: 100%;
     border: #ec971f;
-}
-
-.run{
-    border: tall #1d2e38;
-    width: auto;
-    background: $primary-background-darken-2;
-}
-
-.run:hover{
-    background: #2d4156;
 }
 
 .empty > Horizontal > #description{
@@ -319,22 +244,15 @@ Screen {
     width: auto;
 }
 
-#arguments {
-    margin-top: 1;
-    content-align: center middle;
-    width: 100%;
-    min-height: 1;
-    text-style: bold;
-    border: hkey red;
+.run{
+    border: tall #1d2e38;
+    width: auto;
+    background: $primary-background-darken-2;
+    margin-right: 2
 }
 
-#options2 {
-    margin-top: 1;
-    content-align: center middle;
-    width: 100%;
-    min-height: 1;
-    text-style: bold;
-    border: hkey green;
+.run:hover {
+    background: #2d4156;
 }
 
 /* SHOW */

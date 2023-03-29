@@ -14,12 +14,12 @@ class Header(Static):
 
 class Show(Screen):
 
-    def __init__(self, application, command, homepage_data=None, command_data=None, lista=None) -> None:
+    def __init__(self, application, command, homepage_data=None, tuple_data=None, other_data=None) -> None:
         self.application = application
         self.command = command
         self.homepage_data = homepage_data
-        self.command_data = command_data
-        self.lista = lista
+        self.tuple_data = tuple_data
+        self.other_data = other_data
         super().__init__()
 
     def compose(self) -> ComposeResult:
@@ -38,18 +38,18 @@ class Show(Screen):
 
         args.append(self.command)
 
-        for key, value in self.command_data.items():
+        for key, value in self.tuple_data.items():
             args.append(key)
             if value != "BOOL":
                 if isinstance(value, list):
                     for val in value:
                         args.append(val)
                 else:
-                    values = value.split(",")  # Dividi il valore in una lista di stringhe
+                    values = value.split(",")
                     for val in values:
                         args.append(val.strip())
 
-        for elemento in self.lista:
+        for elemento in self.other_data:
             args.append(elemento)
 
         result = subprocess.run(args, capture_output=True)

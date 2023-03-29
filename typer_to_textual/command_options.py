@@ -78,16 +78,13 @@ class CommandOptions(Screen):
 
                 if words:
 
-                    if ',' in words[0]:
-                        words[0] = words[0].split(",")[0]
-                    words[0] = words[0].replace('--', '')
+                    words[0] = words[0].split(",")[0].replace('--', '')
 
                     if words[0] == "help":
                         continue
 
-                    if len(words) > 1:
-                        if words[1].startswith("-"):
-                            words.remove(words[1])
+                    if len(words) > 1 and words[1].startswith("-"):
+                        words.remove(words[1])
 
                     if len(words) == 1:
                         words.append("BOOLEAN")
@@ -96,8 +93,6 @@ class CommandOptions(Screen):
                         types = ["INTEGER", "FLOAT", "TEXT", "TUPLE", "UUID", "PATH", "FILENAME", "BOOLEAN"]
                         if not any(words[1].replace('[', '(').replace('<', '(').startswith(t) for t in types):
                             words.insert(1, "BOOLEAN")
-
-                    if len(words) == 2:
                         words.append("No description")
 
                     for i in range(2, len(words)):
@@ -113,31 +108,27 @@ class CommandOptions(Screen):
         arguments = self.arguments()
 
         if len(arguments) != 0 or len(options) != 0:
-            self.mount(Container(id="booklet-vertical"))
+            self.mount(Container(id="command-vertical"))
 
         index = 1
 
         if len(arguments) != 0:
 
-            self.query_one("#booklet-vertical").mount(Horizontal(
+            self.query_one("#command-vertical").mount(Horizontal(
                 Static("Arguments", classes="command-arguments"),
-                classes="command-horizontal-options"
+                classes="command-options-bar"
                 )
             )
 
             for k, v in arguments.items():
 
-                type = Static(f"[b][yellow]{v[0]}[/]", name=f"{v[0]}")
-                type.styles.width = 10
-                type.styles.border = ("blank", "red")
-
-                self.query_one("#booklet-vertical").mount(Container(
+                self.query_one("#command-vertical").mount(Container(
                     Static(f"[b][cyan]{k}[/][/]", classes="name", id=f"--argument--{k}"),
-                    type,
+                    Static(f"[b][yellow]{v[0]}[/]", name=f"{v[0]}", classes="type"),
                     Static(f"[b]{' '.join(v[1:])}[/]", classes="description"),
                     Input(placeholder=f"{k}....", classes="input", name="input"),
-                    Button("one more", classes="buttons", id=f"one_more-{index}"),
-                    classes="booklet-horizontal",
+                    Button("one more", classes="buttons", id=f"one_more&{self.identifier}&{index}"),
+                    classes="command-horizontal",
                     id=f"container-{index}"
                     )
                 )
@@ -145,9 +136,9 @@ class CommandOptions(Screen):
 
         if len(options) != 0:
 
-            self.query_one("#booklet-vertical").mount(Horizontal(
+            self.query_one("#command-vertical").mount(Horizontal(
                 Static("Options", classes="command-options"),
-                classes="command-horizontal-options"
+                classes="command-options-bar"
                 )
             )
 
@@ -157,16 +148,12 @@ class CommandOptions(Screen):
                     stringa_pulita = v[0].replace("<", "").replace(">", "").replace(".", "")
                     elementi = len(stringa_pulita.split())
 
-                    type = Static(f"[b][yellow]{v[0]}[/]", name=f"{stringa_pulita}")
-                    type.styles.width = 10
-                    type.styles.border = ("blank", "red")
-
-                    self.query_one("#booklet-vertical").mount(Container(
+                    self.query_one("#command-vertical").mount(Container(
                         Static(f"[b][cyan]{k}[/][/]", classes="name", id=f"--{k}"),
-                        type,
+                        Static(f"[b][yellow]{v[0]}[/]", name=f"{stringa_pulita}", classes="type"),
                         Static(f"[b]{' '.join(v[1:])}[/]", classes="description"),
                         id=f"{k}",
-                        classes="booklet-horizontal"
+                        classes="command-horizontal"
                         )
                     )
                     for i in range(elementi):
@@ -175,9 +162,6 @@ class CommandOptions(Screen):
                         )
 
                 elif v[0] != "BOOLEAN":
-                    type = Static(f"[b][yellow]{v[0]}[/]", name=f"{v[0]}")
-                    type.styles.width = 10
-                    type.styles.border = ("blank", "red")
                     description = f"{' '.join(v[1:])}"
                     id = k
                     if "(required)" in description:
@@ -186,25 +170,26 @@ class CommandOptions(Screen):
                         d = Static(f"[b]{description} [red](required)[/red][/]", classes="description")
                     else:
                         d = Static(f"[b]{description}[/]", classes="description")
-                    self.query_one("#booklet-vertical").mount(Container(
+
+                    self.query_one("#command-vertical").mount(Container(
                         Static(f"[b][cyan]{k}[/][/]", classes="name", id=f"--{id}"),
-                        type,
+                        Static(f"[b][yellow]{v[0]}[/]", name=f"{v[0]}", classes="type"),
                         d,
                         Input(placeholder=f"{k}....", classes="input", name="input"),
-                        Button("one more", classes="buttons", id=f"one_more-{index}"),
-                        classes="booklet-horizontal",
+                        Button("one more", classes="buttons", id=f"one_more&{self.identifier}&{index}"),
+                        classes="command-horizontal",
                         id=f"container-{index}"
                         )
                     )
                     index += 1
 
                 else:
-                    self.query_one("#booklet-vertical").mount(Horizontal(
+                    self.query_one("#command-vertical").mount(Horizontal(
                         Static(f"[b][cyan]{k}[/][/]", classes="name", id=f"--{k}"),
-                        Static(f"[b][yellow]{v[0]}[/]", classes="types", name="BOOLEAN"),
+                        Static(f"[b][yellow]{v[0]}[/]", classes="type", name="BOOLEAN"),
                         Static(f"[b]{' '.join(v[1:])}[/]", classes="description"),
                         Checkbox(name="checkbox"),
-                        classes="booklet-horizontal"
+                        classes="command-horizontal"
                         )
                     )
                     index += 1
@@ -221,17 +206,15 @@ class CommandOptions(Screen):
             )
 
         else:
-            self.query_one("#booklet-vertical").mount(
+            self.query_one("#command-vertical").mount(
                 Horizontal(
                     Button("show", id=f"show-{self.identifier}", classes="run"),
-                    classes="booklet-horizontal-button",
+                    classes="command-horizontal-run",
                     )
             )
 
     def on_input_submitted(self, event: Input.Submitted):
         event.input.action_cursor_left()
-
-
 
     BINDINGS = [
         Binding(key="r", action="app.pop_screen_n('command')", description="return"),

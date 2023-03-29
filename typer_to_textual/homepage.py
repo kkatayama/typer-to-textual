@@ -97,6 +97,7 @@ class HomePage(Screen):
 
     def on_mount(self) -> None:
 
+        global container
         title = self.title()
         self.mount(Static(f"[green][bold]{title}", classes="title"))
         self.mount(Vertical(id="homepage-vertical"))
@@ -119,7 +120,7 @@ class HomePage(Screen):
                         Checkbox(name="checkbox"),
                         classes="homepage-horizontal"
                     )
-                else:
+                elif not v[0].startswith("["):
                     description = v[1].replace("(required)", "").strip()
                     id = k if "(required)" not in v[1] else f"{k}-required"
                     required_label = " [red](required)[/red]" if "(required)" in v[1] else ""
