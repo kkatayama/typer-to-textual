@@ -10,9 +10,9 @@ from textual.pilot import Pilot
 from rich.console import Console
 from typing import Tuple, List
 
-from typer_to_textual.command_options import CommandOptions
-from typer_to_textual.homepage import HomePage
-from typer_to_textual.show import Show
+from command_options import CommandOptions
+from homepage import HomePage
+from show import Show
 
 
 def maximize() -> None:
@@ -55,7 +55,7 @@ class Tui(App):
         self.output, self.application = homepage_output()
         super().__init__()
 
-    CSS_PATH = "typer_to_textual/style.css"
+    CSS_PATH = "style.css"
 
     BINDINGS = [
         Binding(key="escape", action="key_escape", description="exit"),

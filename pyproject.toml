@@ -1,17 +1,16 @@
 [tool.poetry]
-name = "generic-typer"
+name = "typer-to-textual"
 version = "0.1.0"
 description = ""
 authors = ["palla98 <pallaria98@gmail.com>"]
 readme = "README.md"
-packages = [{include = "generic_typer"}]
+packages = [{include = "typer_to_textual"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
 textual = "^0.10.1"
 typer = "^0.7.0"
 rich = "^13.3.2"
-
 
 [build-system]
 requires = ["poetry-core"]
