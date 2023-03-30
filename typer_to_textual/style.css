@@ -71,28 +71,28 @@ Screen {
 .homepage-horizontal > .name{
     content-align: center middle;
     text-style: bold;
-    width: 12;
+    width: 15%;
     border: blank;
 }
 
 .homepage-horizontal > .type{
     content-align: center middle;
     text-style: bold;
-    width: 10;
+    width: 10%;
     border: blank;
 }
 
 .homepage-horizontal > .description{
     content-align: center middle;
     text-style: bold;
-    width: 55%;
+    width: 42%;
     border: blank;
 }
 
 .homepage-horizontal > .description-bool{
     content-align: center middle;
     text-style: bold;
-    width: 65%;
+    width: 53%;
     border: blank;
 }
 
@@ -102,7 +102,7 @@ Screen {
 }
 
 .homepage-horizontal > .input{
-    width: 20;
+    width: 20%;
 }
 
 .homepage-command {

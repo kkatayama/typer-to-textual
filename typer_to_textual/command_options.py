@@ -34,6 +34,7 @@ class CommandOptions(Screen):
                 start_arguments = False
 
             if start_arguments and any(word.isalpha() for word in line.split()):
+                required = False
                 items = line.split(" ")
                 words = []
                 current_word = ""
@@ -41,6 +42,8 @@ class CommandOptions(Screen):
                     if option and option != '│' and option != '*':
                         current_word += " " + option
                     else:
+                        if option == '*':
+                            required = True
                         words.append(current_word.strip())
                         current_word = ""
 
@@ -50,6 +53,8 @@ class CommandOptions(Screen):
                 if words:
                     words[0] = words[0].replace('--', '')
                     words[2] = words[2].replace('[', '(').replace(']', ')')
+                    if required:
+                        words[2] += '*'
                     if words[0] == "help":
                         continue
                 arguments[words[0]] = [words[1], words[2]]
@@ -64,6 +69,7 @@ class CommandOptions(Screen):
                 start = True
                 continue
             if start:
+                required = False
                 items = line.split(" ")
                 words = []
                 current_word = ""
@@ -71,6 +77,8 @@ class CommandOptions(Screen):
                     if option and option != '│' and option != '*':
                         current_word += " " + option
                     else:
+                        if option == '*':
+                            required = True
                         words.append(current_word.strip())
                         current_word = ""
 
@@ -78,10 +86,10 @@ class CommandOptions(Screen):
 
                 if words:
 
-                    words[0] = words[0].split(",")[0].replace('--', '')
-
-                    if words[0] == "help":
+                    if not words[0].startswith("--") or words[0].split(",")[0].replace('--', '') == "help":
                         continue
+
+                    words[0] = words[0].split(",")[0].replace('--', '')
 
                     if len(words) > 1 and words[1].startswith("-"):
                         words.remove(words[1])
@@ -97,6 +105,8 @@ class CommandOptions(Screen):
 
                     for i in range(2, len(words)):
                         words[i] = words[i].replace('[', '(').replace(']', ')')
+                        if required:
+                            words[i] += '*'
 
                     options[words[0]] = words[1:]
 
@@ -104,8 +114,8 @@ class CommandOptions(Screen):
 
     def on_mount(self) -> None:
 
-        options = self.options()
         arguments = self.arguments()
+        options = self.options()
 
         if len(arguments) != 0 or len(options) != 0:
             self.mount(Container(id="command-vertical"))
@@ -122,10 +132,19 @@ class CommandOptions(Screen):
 
             for k, v in arguments.items():
 
+                description = f"{' '.join(v[1:])}"
+                id = f"--argument--{k}"
+                if "*" in description:
+                    description = description.replace("(required)", "").replace("*", "")
+                    id = f"--argument--{k}-required"
+                    description = Static(f"[b]{description} [red]required[/red][/]", classes="description")
+                else:
+                    description = Static(f"[b]{description}[/]", classes="description")
+
                 self.query_one("#command-vertical").mount(Container(
-                    Static(f"[b][cyan]{k}[/][/]", classes="name", id=f"--argument--{k}"),
+                    Static(f"[b][cyan]{k}[/][/]", classes="name", id=f"{id}"),
                     Static(f"[b][yellow]{v[0]}[/]", name=f"{v[0]}", classes="type"),
-                    Static(f"[b]{' '.join(v[1:])}[/]", classes="description"),
+                    description,
                     Input(placeholder=f"{k}....", classes="input", name="input"),
                     Button("one more", classes="buttons", id=f"one_more&{self.identifier}&{index}"),
                     classes="command-horizontal",
@@ -145,18 +164,18 @@ class CommandOptions(Screen):
             for k, v in options.items():
 
                 if v[0].startswith("<"):
-                    stringa_pulita = v[0].replace("<", "").replace(">", "").replace(".", "")
-                    elementi = len(stringa_pulita.split())
+                    clean_string = v[0].replace("<", "").replace(">", "").replace(".", "")
+                    elements = len(clean_string.split())
 
                     self.query_one("#command-vertical").mount(Container(
                         Static(f"[b][cyan]{k}[/][/]", classes="name", id=f"--{k}"),
-                        Static(f"[b][yellow]{v[0]}[/]", name=f"{stringa_pulita}", classes="type"),
+                        Static(f"[b][yellow]{v[0]}[/]", name=f"{clean_string}", classes="type"),
                         Static(f"[b]{' '.join(v[1:])}[/]", classes="description"),
                         id=f"{k}",
                         classes="command-horizontal"
                         )
                     )
-                    for i in range(elementi):
+                    for i in range(elements):
                         self.query_one(f"#{k}").mount(
                                 Input(placeholder=f"{i+1}°...", classes="input", id=f"--{k}_{i+1}", name="input"),
                         )
@@ -164,17 +183,17 @@ class CommandOptions(Screen):
                 elif v[0] != "BOOLEAN":
                     description = f"{' '.join(v[1:])}"
                     id = k
-                    if "(required)" in description:
-                        description = description.replace("(required)", "")
+                    if "*" in description:
+                        description = description.replace("(required)", "").replace("*", "")
                         id = k + "-required"
-                        d = Static(f"[b]{description} [red](required)[/red][/]", classes="description")
+                        description = Static(f"[b]{description} [red]required[/red][/]", classes="description")
                     else:
-                        d = Static(f"[b]{description}[/]", classes="description")
+                        description = Static(f"[b]{description}[/]", classes="description")
 
                     self.query_one("#command-vertical").mount(Container(
                         Static(f"[b][cyan]{k}[/][/]", classes="name", id=f"--{id}"),
                         Static(f"[b][yellow]{v[0]}[/]", name=f"{v[0]}", classes="type"),
-                        d,
+                        description,
                         Input(placeholder=f"{k}....", classes="input", name="input"),
                         Button("one more", classes="buttons", id=f"one_more&{self.identifier}&{index}"),
                         classes="command-horizontal",

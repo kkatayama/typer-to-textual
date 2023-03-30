@@ -139,8 +139,13 @@ class Tui(App):
                                     input_type = "FLOAT"
                                 else:
                                     input_type = "TEXT"
-                            else:
+                            elif static_element.name.startswith("<"):
                                 input_type = "TUPLE"
+                            else:
+                                input_type = "ARGUMENT"
+
+                    if input_type == "ARGUMENT":
+                        break
 
                     if input_type == "INTEGER" or input_type == "FLOAT":
                         for input_element in element.query(".input"):

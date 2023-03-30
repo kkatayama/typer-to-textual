@@ -56,6 +56,8 @@ class HomePage(Screen):
                 words = list(filter(bool, words))
 
                 if words:
+                    if not words[0].startswith("--") or words[0].split(",")[0].replace('--', '') == "help":
+                        continue
                     words[0] = words[0].split(",")[0].replace('--', '')
                     if words[0] != "help":
                         if len(words) > 1 and words[1].startswith("-"):
