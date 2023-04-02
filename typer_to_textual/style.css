@@ -22,7 +22,7 @@ Screen {
     border: hkey #2d4156;
 }
 
-/* HOMEPAGE */
+/* Homepage */
 
 #homepage-vertical {
     width: 100%;
@@ -130,7 +130,7 @@ Screen {
     background: #2d4156;
 }
 
-/* BOOKLET */
+/* Commands */
 
 #command-vertical {
     layout: vertical;

@@ -71,8 +71,6 @@ class HomePage(Screen):
                         words[2:] = [w.replace('[', '(').replace(']', ')') for w in words[2:]]
                         options[words[0]] = words[1:] + (["No description"] if len(words) == 2 else [])
 
-
-
             elif start_commands and any(word.isalpha() for word in line.split()):
                 command = line.split(" ")
                 words = []

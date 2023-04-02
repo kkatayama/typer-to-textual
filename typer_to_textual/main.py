@@ -286,7 +286,7 @@ class Tui(App):
             for screens in self.query(CommandOptions):
                 if screens.identifier == id:
                     placeholder = screens.query_one(f"#container-{index} .name").id
-                    placeholder = placeholder.replace("--argument--", "").replace("--", "").replace("-required","")
+                    placeholder = placeholder.replace("--argument--", "").replace("--", "").replace("-required", "")
                     input_element = Input(placeholder=f"{placeholder}....", classes="input")
                     screens.query_one(f"#container-{index}").mount(input_element, before=3)
 
