@@ -32,6 +32,7 @@ def maximize() -> None:
     # Move the window to the calculated position
     subprocess.run(["xdotool", "windowmove", window_id, str(x_pos), str(y_pos)])
 
+
 def homepage_output() -> Tuple[List[str], str]:
 
     if len(sys.argv) != 2:
@@ -39,10 +40,12 @@ def homepage_output() -> Tuple[List[str], str]:
         sys.exit(1)
 
     application = sys.argv[1]
+    command = application.split()
+    command.append("--help")
     maximize()
 
     try:
-        result = subprocess.run([application, "--help"], capture_output=True)
+        result = subprocess.run(command, capture_output=True)
         return result.stdout.decode().split('\n'), application
     except FileNotFoundError:
         Console().print(f"[bold][red]Error[/red]: The application: '{application}' is not found")
