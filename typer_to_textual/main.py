@@ -18,16 +18,25 @@ from show import Show
 def maximize() -> None:
     result = subprocess.run(["xdotool", "getactivewindow"], capture_output=True)
     window_id = result.stdout.decode().strip()
-    subprocess.run(["xdotool", "windowsize", window_id, "70%", "70%"])
 
     # Get the screen resolution
     res = subprocess.check_output("xrandr | grep '\*' | awk '{print $1}'", shell=True).decode().strip().split('x')
     screen_width = int(res[0])
     screen_height = int(res[1])
 
+    # Determine the window size based on screen resolution
+    if screen_width <= 1366 and screen_height <= 768:
+        window_size = "80%"
+    else:
+        window_size = "70%"
+
+    subprocess.run(["xdotool", "windowsize", window_id, window_size, window_size])
+
     # Calculate the window position to center it on the screen
-    x_pos = int((screen_width - (screen_width * 0.7)) / 2)
-    y_pos = int((screen_height - (screen_height * 0.7)) / 2)
+    window_width = int(window_size[:-1]) / 100 * screen_width
+    window_height = int(window_size[:-1]) / 100 * screen_height
+    x_pos = int((screen_width - window_width) / 2)
+    y_pos = int((screen_height - window_height) / 2)
 
     # Move the window to the calculated position
     subprocess.run(["xdotool", "windowmove", window_id, str(x_pos), str(y_pos)])
