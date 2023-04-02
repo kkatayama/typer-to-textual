@@ -189,20 +189,20 @@ Screen {
 
 .command-horizontal > .type {
     border: blank;
-    width: 10;
+    width: 10%;
 }
 
 .command-horizontal > .name {
     border: blank;
-    width: 15;
-}
-
-.command-horizontal > .input {
     width: 15%;
 }
 
+.command-horizontal > .input {
+    width: 10%;
+}
+
 .command-horizontal > .buttons {
-    margin-left: 6;
+    margin-left: 2;
     margin-right: 1;
     min-width: 5;
     background: $primary-background-darken-2;

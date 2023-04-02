@@ -145,7 +145,7 @@ class CommandOptions(Screen):
                     Static(f"[b][cyan]{k}[/][/]", classes="name", id=f"{id}"),
                     Static(f"[b][yellow]{v[0]}[/]", name=f"{v[0]}", classes="type"),
                     description,
-                    Input(placeholder=f"{k}....", classes="input", name="input"),
+                    Input(placeholder=f"...", classes="input", name="input"),
                     Button("one more", classes="buttons", id=f"one_more&{self.identifier}&{index}"),
                     classes="command-horizontal",
                     id=f"container-{index}"
@@ -177,7 +177,7 @@ class CommandOptions(Screen):
                     )
                     for i in range(elements):
                         self.query_one(f"#{k}").mount(
-                                Input(placeholder=f"{i+1}°...", classes="input", id=f"--{k}_{i+1}", name="input"),
+                                Input(placeholder=f"{i+1}°", classes="input", id=f"--{k}_{i+1}", name="input"),
                         )
 
                 elif v[0] != "BOOLEAN":
@@ -194,7 +194,7 @@ class CommandOptions(Screen):
                         Static(f"[b][cyan]{k}[/][/]", classes="name", id=f"--{id}"),
                         Static(f"[b][yellow]{v[0]}[/]", name=f"{v[0]}", classes="type"),
                         description,
-                        Input(placeholder=f"{k}....", classes="input", name="input"),
+                        Input(placeholder=f"...", classes="input", name="input"),
                         Button("one more", classes="buttons", id=f"one_more&{self.identifier}&{index}"),
                         classes="command-horizontal",
                         id=f"container-{index}"
@@ -231,9 +231,6 @@ class CommandOptions(Screen):
                     classes="command-horizontal-run",
                     )
             )
-
-    def on_input_submitted(self, event: Input.Submitted):
-        event.input.action_cursor_left()
 
     BINDINGS = [
         Binding(key="r", action="app.pop_screen_n('command')", description="return"),

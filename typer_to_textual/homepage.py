@@ -131,7 +131,7 @@ class HomePage(Screen):
                         Static(f"[cyan]{k}", classes="name", id=f"--{id}"),
                         Static(f"[b][yellow]{v[0]}[/]", name=f"{v[0]}", classes="type"),
                         description,
-                        Input(placeholder=f"{k}....", password=is_password, name=f"{v[0]}&{k}", classes="input"),
+                        Input(placeholder=f"{k}", password=is_password, name=f"{v[0]}&{k}", classes="input"),
                         classes="homepage-horizontal"
                     )
 

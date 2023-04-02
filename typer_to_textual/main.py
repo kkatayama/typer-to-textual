@@ -278,17 +278,22 @@ class Tui(App):
                 self.install_screen(Show(self.application, command, homepage_data, tuple_data, other_data), name=event.button.id)
             self.push_screen(event.button.id)
 
-        elif event.button.id.startswith("one_more"):
+        elif event.button.id.startswith("one_"):
 
-            id = event.button.id.split("&")[1]
-            index = event.button.id.split("&")[2]
-
+            id, index = event.button.id.split("&")[1:]
             for screens in self.query(CommandOptions):
                 if screens.identifier == id:
-                    placeholder = screens.query_one(f"#container-{index} .name").id
-                    placeholder = placeholder.replace("--argument--", "").replace("--", "").replace("-required", "")
-                    input_element = Input(placeholder=f"{placeholder}....", classes="input")
-                    screens.query_one(f"#container-{index}").mount(input_element, before=3)
+                    container = screens.query_one(f"#container-{index}")
+                    input_elements = container.query("Input")
+                    if event.button.id.startswith("one_more"):
+                        if len(input_elements) == 1:
+                            container.mount(Button("one less", classes="buttons", id=f"one_less&{id}&{index}"), after=4)
+                        input_element = Input(placeholder=f"...", classes="input")
+                        container.mount(input_element, before=3)
+                    elif event.button.id.startswith("one_less") and len(input_elements) > 1:
+                        input_elements.first().remove()
+                        if len(container.query("Input")) == 1:
+                            container.query("Button").last().remove()
 
     async def action_pop_screen_n(self, screen):
 
