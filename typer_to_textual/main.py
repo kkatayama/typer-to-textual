@@ -55,6 +55,9 @@ def homepage_output() -> Tuple[List[str], str]:
 
     try:
         result = subprocess.run(command, capture_output=True)
+        if len(result.stdout.decode().split('\n')) == 1:
+            Console().print(f"[bold][red]Error[/red]: The application: '{application}' is not found")
+            sys.exit(1)
         return result.stdout.decode().split('\n'), application
     except FileNotFoundError:
         Console().print(f"[bold][red]Error[/red]: The application: '{application}' is not found")
@@ -131,7 +134,7 @@ class Tui(App):
 
     def check(self, elements: str, id: str):
 
-        almeno_uno = False
+        validation_errors = False
 
         screen_class = "HomePage" if id == "homepage" else "CommandOptions"
 
@@ -169,7 +172,7 @@ class Tui(App):
                                         float(input_element.value)
                                 input_element.styles.border = None
                             except ValueError:
-                                almeno_uno = True
+                                validation_errors = True
                                 input_element.styles.border = ("tall", "red")
 
                     elif input_type == "TUPLE":
@@ -185,7 +188,7 @@ class Tui(App):
                                     expected_type(input_element.value)
                                 input_element.styles.border = None
                             except ValueError:
-                                almeno_uno = True
+                                validation_errors = True
                                 input_element.styles.border = ("tall", "red")
 
                 for element in screens.query(f".{elements}"):
@@ -195,12 +198,12 @@ class Tui(App):
                             if "-required" in key:
                                 for input_element in element.query(".input"):
                                     if input_element.value == "":
-                                        almeno_uno = True
+                                        validation_errors = True
                                         input_element.styles.border = ("tall", "red")
                                     else:
                                         input_element.styles.border = None
 
-        return almeno_uno
+        return validation_errors
 
     def homePage_field(self) -> list:
 
@@ -261,8 +264,8 @@ class Tui(App):
 
         if event.button.id in buttons:
 
-            almeno_uno = self.check("homepage-horizontal", "homepage")
-            if almeno_uno:
+            validation_errors = self.check("homepage-horizontal", "homepage")
+            if validation_errors:
                 return
 
             description = values[event.button.id]
@@ -276,8 +279,8 @@ class Tui(App):
         elif event.button.id.startswith("show-"):
 
             command = event.button.id.replace("show-", "")
-            almeno_uno = self.check("command-horizontal", command)
-            if almeno_uno:
+            validation_errors = self.check("command-horizontal", command)
+            if validation_errors:
                 return
 
             homepage_data = self.homePage_field()

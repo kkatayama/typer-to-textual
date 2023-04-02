@@ -1,4 +1,3 @@
-
 from textual.app import ComposeResult
 from textual.widgets import Static, Button, Footer, Input, Checkbox
 from textual.containers import Container, Horizontal, Vertical
@@ -98,6 +97,7 @@ class HomePage(Screen):
     def on_mount(self) -> None:
 
         global container
+
         title = self.title()
         self.mount(Static(f"[green][bold]{title}", classes="title"))
         self.mount(Vertical(id="homepage-vertical"))

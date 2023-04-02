@@ -49,8 +49,8 @@ class Show(Screen):
                     for val in values:
                         args.append(val.strip())
 
-        for elemento in self.other_data:
-            args.append(elemento)
+        for element in self.other_data:
+            args.append(element)
 
         result = subprocess.run(args, capture_output=True)
 
