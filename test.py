@@ -5,7 +5,7 @@ from typing import List, Tuple
 
 from rich.console import Console
 
-from tui import Tui
+from typer_to_textual import Tui
 
 
 def main_output():

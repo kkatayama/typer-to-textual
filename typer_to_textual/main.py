@@ -10,9 +10,9 @@ from textual.pilot import Pilot
 from rich.console import Console
 from typing import Tuple, List
 
-from command_options import CommandOptions
-from homepage import HomePage
-from show import Show
+from typer_to_textual.command_options import CommandOptions
+from typer_to_textual.homepage import HomePage
+from typer_to_textual.show import Show
 
 
 def maximize() -> None:
@@ -325,5 +325,4 @@ class Tui(App):
                 self.pop_screen()
 
 
-if __name__ == "__main__":
-    Tui().run()
+
