@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "typer-to-textual"
-version = "0.1.0"
+version = "2.1.0"
 description = ""
 authors = ["palla98 <pallaria98@gmail.com>"]
 readme = "README.md"
