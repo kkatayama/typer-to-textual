@@ -99,7 +99,8 @@ class Tui(App):
 
         maximize()
 
-        args = [self.application]
+        application = self.application
+        args = application.split()
 
         for option in homepage_data:
             args.append(option)

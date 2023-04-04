@@ -31,7 +31,8 @@ class Show(Screen):
 
     async def run_button(self):
 
-        args = [self.application]
+        application = self.application
+        args = application.split()
 
         for option in self.homepage_data:
             args.append(option)
