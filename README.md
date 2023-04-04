@@ -31,7 +31,7 @@ $ sudo apt install python3-poetry
 ```
 After that, run the following commands:
 ```bash
-$ git clone git@github.com/palla98/typer-to-textual.git
+$ git clone https://github.com/palla98/typer-to-textual.git
 ```
 
 after downloading:
