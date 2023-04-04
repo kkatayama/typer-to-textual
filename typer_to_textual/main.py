@@ -55,8 +55,12 @@ def homepage_output() -> Tuple[List[str], str]:
 
     try:
         result = subprocess.run(command, capture_output=True)
-        if len(result.stdout.decode().split('\n')) == 1:
-            Console().print(f"[bold][red]Error[/red]: The application: '{application}' is not found")
+        found = False
+        for line in result.stdout.decode().split('\n'):
+            if "Options" in line or "Commands" in line:
+                found = True
+        if not found:
+            Console().print(f"[bold][red]Error[/red]: The executable is not a typer apllication")
             sys.exit(1)
         return result.stdout.decode().split('\n'), application
     except FileNotFoundError:
@@ -205,7 +209,7 @@ class Tui(App):
 
         return validation_errors
 
-    def homePage_field(self) -> list:
+    def homepage_field(self) -> list:
 
         homepage_data = []
         for element in self.query_one(HomePage).query(".homepage-horizontal"):
@@ -222,7 +226,7 @@ class Tui(App):
 
         return homepage_data
 
-    def commandPage_field(self, command):
+    def command_page_field(self, command):
 
         tuple_data = {}
         other_data = []
@@ -269,7 +273,7 @@ class Tui(App):
                 return
 
             description = values[event.button.id]
-            homepage_data = self.homePage_field()
+            homepage_data = self.homepage_field()
 
             if not self.is_screen_installed(event.button.id):
                 result = self.call_command(event.button.id, homepage_data)
@@ -283,8 +287,8 @@ class Tui(App):
             if validation_errors:
                 return
 
-            homepage_data = self.homePage_field()
-            tuple_data, other_data = self.commandPage_field(command)
+            homepage_data = self.homepage_field()
+            tuple_data, other_data = self.command_page_field(command)
 
             if not self.is_screen_installed(event.button.id):
                 self.install_screen(Show(self.application, command, homepage_data, tuple_data, other_data), name=event.button.id)
