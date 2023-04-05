@@ -45,3 +45,45 @@ After that, **typer-to-textual** can be run with:
 ```bash
 $ poetry run ./typer_to_textual.py [typer_application]
 ```
+
+se però [typer_application] è '**python3 -m [nome_modulo]**' bisogna stare attenti perchè si utlizza
+l'interprete Python dell'ambiente virtuale creato da Poetry. Quindi bisogna andare ad installare 
+[nome_modulo] nell'ambiente virtuale altrimenti non viene riconosciuto.
+
+oppure semplicemente si può lanciare il comando:
+```bash
+python3 typer_to_textual.py 'python3 -m [nome_modulo]'
+```
+
+la cosa migliore è andare a creare uno script .sh in modo tale da passare direttamente un eseguibile
+Lo si va a creare e salvare nella tua directory bin personale:
+(~/.local/bin/[nome_script].sh):
+```bash
+sudo nano ~/.local/bin/[nome_script].sh
+```
+
+```bash
+#!/bin/bash
+
+OLD_PWD=$PWD
+
+cd path/to/executable
+poetry run ./executable "$@"
+cd $PWD
+```
+In seguito renderlo eseguibile con questo comando:
+```bash
+sudo chmod +x ~/.local/bin/[nome_script].sh
+```
+
+e poi andare a creare un link simbolico:
+```bash
+sudo ln -s  ~/.local/bin/[nome_script].sh ~/.local/bin/[nome_script]
+```
+Dopodichè semplicemente basterà chiamare lo script digitando semplicemente il comando [nome_script]
+da qualsiasi posizione nel terminale.
+
+quindi si potrà usare typer-to-textual anche in questo modo senza avere problemi di ambiente virtuale:
+```bash
+poetry run ./typer_to_textual.py [nome_script]
+```

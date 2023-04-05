@@ -60,6 +60,9 @@ def homepage_output() -> Tuple[List[str], str]:
             if "Options" in line or "Commands" in line:
                 found = True
         if not found:
+            for i in result.stderr.decode().split('\n'):
+                if i:
+                    print(i.rstrip())
             Console().print(f"[bold][red]Error[/red]: The executable is not a typer apllication")
             sys.exit(1)
         return result.stdout.decode().split('\n'), application
