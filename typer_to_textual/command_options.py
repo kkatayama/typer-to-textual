@@ -233,5 +233,5 @@ class CommandOptions(Screen):
             )
 
     BINDINGS = [
-        Binding(key="r", action="app.pop_screen_n('command')", description="return"),
+        Binding(key="r", action="app.type_r('command')", description="return"),
     ]

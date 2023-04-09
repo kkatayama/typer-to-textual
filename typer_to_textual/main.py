@@ -19,12 +19,10 @@ def maximize() -> None:
     result = subprocess.run(["xdotool", "getactivewindow"], capture_output=True)
     window_id = result.stdout.decode().strip()
 
-    # Get the screen resolution
     res = subprocess.check_output("xrandr | grep '\*' | awk '{print $1}'", shell=True).decode().strip().split('x')
     screen_width = int(res[0])
     screen_height = int(res[1])
 
-    # Determine the window size based on screen resolution
     if screen_width <= 1366 and screen_height <= 768:
         window_size = "80%"
     else:
@@ -32,13 +30,11 @@ def maximize() -> None:
 
     subprocess.run(["xdotool", "windowsize", window_id, window_size, window_size])
 
-    # Calculate the window position to center it on the screen
     window_width = int(window_size[:-1]) / 100 * screen_width
     window_height = int(window_size[:-1]) / 100 * screen_height
     x_pos = int((screen_width - window_width) / 2)
     y_pos = int((screen_height - window_height) / 2)
 
-    # Move the window to the calculated position
     subprocess.run(["xdotool", "windowmove", window_id, str(x_pos), str(y_pos)])
 
 
@@ -63,9 +59,10 @@ def homepage_output() -> Tuple[List[str], str]:
             for i in result.stderr.decode().split('\n'):
                 if i:
                     print(i.rstrip())
-            Console().print(f"[bold][red]Error[/red]: The executable is not a typer apllication")
+            Console().print(f"[bold][red]Error[/red]: The executable is not a typer application")
             sys.exit(1)
         return result.stdout.decode().split('\n'), application
+
     except FileNotFoundError:
         Console().print(f"[bold][red]Error[/red]: The application: '{application}' is not found")
         sys.exit(1)
@@ -140,14 +137,14 @@ class Tui(App):
 
         return buttons
 
-    def check(self, elements: str, id: str):
+    def check_fields(self, elements: str, page: str):
 
         validation_errors = False
 
-        screen_class = "HomePage" if id == "homepage" else "CommandOptions"
+        screen_class = "HomePage" if page == "homepage" else "CommandOptions"
 
         for screens in self.query(f"{screen_class}"):
-            if screens.identifier == id:
+            if screens.identifier == page:
                 for element in screens.query(f".{elements}"):
                     input_type = ''
                     tuple_types = []
@@ -219,12 +216,12 @@ class Tui(App):
         for element in self.query_one(HomePage).query(".homepage-horizontal"):
             key = element.query_one(".name").id.replace("-required", "")
             if len(element.query("Input")) > 0:
-                for index, i in enumerate(element.query("Input"), start=1):
+                for i in element.query("Input"):
                     if i.value != '':
                         homepage_data.append(key)
                         homepage_data.append(i.value)
             else:
-                for index, i in enumerate(element.query("Checkbox"), start=1):
+                for i in element.query("Checkbox"):
                     if str(i.value) == "True":
                         homepage_data.append(key)
 
@@ -244,14 +241,14 @@ class Tui(App):
                             key = key.replace("-required", "")
                         diversi = len(set(i.placeholder for i in element.query(".input"))) > 1
                         if diversi:
-                            for index, i in enumerate(element.query(".input"), start=1):
+                            for i in element.query(".input"):
                                 if i.value != '':
                                     if key not in tuple_data:
                                         tuple_data[key] = [i.value]
                                     else:
                                         tuple_data[key].append(i.value)
                         else:
-                            for index, i in enumerate(element.query(".input"), start=1):
+                            for i in element.query(".input"):
                                 if "--argument--" in key and i.value != '':
                                     other_data.append(i.value)
                                 elif i.value != '':
@@ -272,7 +269,7 @@ class Tui(App):
 
         if event.button.id in buttons:
 
-            validation_errors = self.check("homepage-horizontal", "homepage")
+            validation_errors = self.check_fields("homepage-horizontal", "homepage")
             if validation_errors:
                 return
 
@@ -287,7 +284,7 @@ class Tui(App):
         elif event.button.id.startswith("show-"):
 
             command = event.button.id.replace("show-", "")
-            validation_errors = self.check("command-horizontal", command)
+            validation_errors = self.check_fields("command-horizontal", command)
             if validation_errors:
                 return
 
@@ -315,7 +312,7 @@ class Tui(App):
                         if len(container.query("Input")) == 1:
                             container.query("Button").last().remove()
 
-    async def action_pop_screen_n(self, screen):
+    async def action_type_r(self, screen):
 
         input_has_focus = any(i.has_focus for i in self.query("Input"))
 

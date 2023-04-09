@@ -96,7 +96,7 @@ class HomePage(Screen):
 
     def on_mount(self) -> None:
 
-        global container
+        container = None
 
         title = self.title()
         self.mount(Static(f"[green][bold]{title}", classes="title"))

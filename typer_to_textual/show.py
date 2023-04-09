@@ -14,12 +14,12 @@ class Header(Static):
 
 class Show(Screen):
 
-    def __init__(self, application, command, homepage_data=None, tuple_data=None, other_data=None) -> None:
+    def __init__(self, application, command, homepage_data=None, command_tuple_data=None, command_other_data=None) -> None:
         self.application = application
         self.command = command
         self.homepage_data = homepage_data
-        self.tuple_data = tuple_data
-        self.other_data = other_data
+        self.command_tuple_data = command_tuple_data
+        self.command_other_data = command_other_data
         super().__init__()
 
     def compose(self) -> ComposeResult:
@@ -39,7 +39,7 @@ class Show(Screen):
 
         args.append(self.command)
 
-        for key, value in self.tuple_data.items():
+        for key, value in self.command_tuple_data.items():
             args.append(key)
             if value != "BOOL":
                 if isinstance(value, list):
@@ -50,7 +50,7 @@ class Show(Screen):
                     for val in values:
                         args.append(val.strip())
 
-        for element in self.other_data:
+        for element in self.command_other_data:
             args.append(element)
 
         result = subprocess.run(args, capture_output=True)
@@ -69,5 +69,5 @@ class Show(Screen):
         asyncio.create_task(self.run_button())
 
     BINDINGS = [
-        Binding(key="r", action="app.pop_screen_n('show')", description="return"),
+        Binding(key="r", action="app.type_r('show')", description="return"),
     ]
